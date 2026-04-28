@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BÖV Lernprogramm – Allgemeine Themenbereiche</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface2: #f0f2f5;
+  --surface3: #e4e7ec;
+  --accent: #1a6bcc;
+  --accent-gold: #b07d0a;
+  --accent-green: #1a7a34;
+  --accent-red: #c0392b;
+  --accent-purple: #6d3fbf;
+  --text: #1a1f2e;
+  --text-muted: #4a5568;
+  --text-dim: #9aa3b0;
+  --border: rgba(0,0,0,0.09);
+  --border-active: rgba(26,107,204,0.3);
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
+
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.brand-badge { background: var(--accent); color: #fff; font-weight: 800; font-size: 12px; padding: 3px 9px; border-radius: 4px; }
+.brand-name { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+.user-switcher {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.user-switcher:hover { border-color: var(--border-active); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-progress-text { font-size: 11px; color: var(--text-muted); }
+.user-chevron { color: var(--text-muted); font-size: 12px; }
+
+.user-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px); left: 0; right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border-active);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.user-dropdown.open { display: block; }
+.dropdown-user-item { padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 13px; transition: background 0.15s; }
+.dropdown-user-item:hover { background: var(--surface3); }
+.dropdown-user-item.active { background: rgba(26,107,204,0.08); }
+.dropdown-divider { height: 1px; background: var(--border); }
+.dropdown-action { padding: 10px 14px; cursor: pointer; font-size: 12px; color: var(--accent); display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+.dropdown-action:hover { background: var(--surface3); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border-active); border-radius: 12px; padding: 28px; width: 100%; max-width: 360px; animation: slideUp 0.25s ease; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.modal-input-wrap { margin-bottom: 16px; }
+.modal-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; display: block; }
+.modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'Syne', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; }
+.modal-input:focus { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.btn-sm { padding: 9px 20px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; border-radius: 7px; cursor: pointer; transition: all 0.2s; border: none; }
+.btn-sm.primary { background: var(--accent); color: #fff; }
+.btn-sm.primary:hover { opacity: 0.9; }
+.btn-sm.ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+.btn-sm.ghost:hover { border-color: rgba(0,0,0,0.2); color: var(--text); }
+
+/* CHAPTER NAV */
+.chapter-nav { padding: 16px 12px; flex: 1; }
+.chapter-nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); padding: 0 8px; margin-bottom: 8px; }
+.chapter-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-radius: 8px; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+.chapter-nav-item:hover { background: var(--surface2); }
+.chapter-nav-item.active { background: rgba(26,107,204,0.08); }
+.chapter-nav-item.active .chapter-nav-title { color: var(--accent); }
+.chapter-status { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; font-weight: 700; transition: all 0.3s; }
+.chapter-status.done { background: var(--accent-green); border-color: var(--accent-green); color: #fff; }
+.chapter-status.active-ring { border-color: var(--accent); color: var(--accent); }
+.chapter-nav-title { font-size: 13px; font-weight: 600; color: var(--text-muted); flex: 1; line-height: 1.3; }
+.chapter-nav-item.active .chapter-nav-title { color: var(--text); }
+.chapter-check-count { font-size: 10px; color: var(--text-dim); background: var(--surface3); padding: 2px 7px; border-radius: 10px; }
+
+/* MODULE LINKS */
+.module-links { padding: 12px 20px; border-top: 1px solid var(--border); }
+.module-link { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; text-decoration: none; margin-bottom: 2px; }
+.module-link:hover { background: var(--surface2); color: var(--text); }
+.module-link-icon { font-size: 16px; }
+
+/* SIDEBAR FOOTER */
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
+.quiz-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--accent-gold); color: #fff; border: none; padding: 12px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-decoration: none; margin-bottom: 8px; }
+.quiz-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.overall-progress { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.overall-bar { flex: 1; height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.overall-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-green)); border-radius: 2px; transition: width 0.6s ease; }
+.overall-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; padding: 40px 48px; max-width: 900px; }
+
+/* HOME */
+.home-hero { margin-bottom: 48px; }
+.home-eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 12px; }
+.home-title { font-family: 'Instrument Serif', serif; font-size: clamp(32px, 4vw, 48px); line-height: 1.15; margin-bottom: 16px; font-style: italic; }
+.home-sub { font-size: 15px; color: var(--text-muted); max-width: 560px; line-height: 1.7; }
+
+.module-overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 40px; }
+.overview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+.overview-card:hover { border-color: var(--border-active); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+.overview-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--card-color, var(--accent)); opacity: 0.5; }
+.overview-card.done::after { opacity: 1; }
+.overview-icon { font-size: 28px; margin-bottom: 12px; }
+.overview-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.overview-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+.overview-progress-bar { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.overview-progress-fill { height: 100%; background: var(--card-color, var(--accent)); border-radius: 2px; transition: width 0.5s ease; }
+
+/* CHAPTER SCREEN */
+.chapter-screen { display: none; animation: fadeIn 0.35s ease; }
+.chapter-screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+.chapter-breadcrumb { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; display: flex; align-items: center; gap: 6px; }
+.breadcrumb-link { cursor: pointer; color: var(--accent); transition: opacity 0.2s; }
+.breadcrumb-link:hover { opacity: 0.7; }
+
+.chapter-header { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.chapter-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.chapter-title { font-family: 'Instrument Serif', serif; font-size: clamp(26px, 4vw, 38px); line-height: 1.2; margin-bottom: 12px; font-style: italic; }
+.chapter-intro { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 620px; }
+
+/* CONTENT */
+.content-block { margin-bottom: 32px; }
+.content-block h3 { font-size: 18px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.content-block h3::before { content: ''; display: inline-block; width: 3px; height: 18px; background: var(--accent); border-radius: 2px; }
+.content-block p { font-size: 15px; line-height: 1.75; color: var(--text-muted); margin-bottom: 14px; }
+.content-block p strong { color: var(--text); }
+
+.key-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 20px 0; font-size: 14px; line-height: 1.7; color: var(--text-muted); }
+.key-box strong { color: var(--text); }
+.key-box.gold { border-left-color: var(--accent-gold); }
+.key-box.green { border-left-color: var(--accent-green); }
+.key-box.red { border-left-color: var(--accent-red); }
+.key-box.purple { border-left-color: var(--accent-purple); }
+.key-box-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 8px; color: var(--accent); }
+.key-box.gold .key-box-label { color: var(--accent-gold); }
+.key-box.green .key-box-label { color: var(--accent-green); }
+.key-box.red .key-box-label { color: var(--accent-red); }
+.key-box.purple .key-box-label { color: var(--accent-purple); }
+
+.compare-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+.compare-table th { background: var(--surface2); padding: 10px 14px; text-align: left; font-weight: 700; color: var(--text); border: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.compare-table td { padding: 10px 14px; border: 1px solid var(--border); color: var(--text-muted); line-height: 1.5; }
+.compare-table tr:hover td { background: var(--surface2); color: var(--text); }
+
+.pill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 13px; color: var(--text-muted); }
+
+.steps { margin: 16px 0; }
+.step-item { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--surface2); border: 1.5px solid rgba(26,107,204,0.3); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; color: var(--accent); }
+.step-content { font-size: 14px; line-height: 1.6; color: var(--text-muted); }
+.step-content strong { color: var(--text); }
+
+.section-divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+/* VERSTÄNDNISFRAGEN */
+.check-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 40px; }
+.check-header { background: var(--surface2); padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.check-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.check-badge { background: rgba(26,107,204,0.08); color: var(--accent); border: 1px solid rgba(26,107,204,0.2); border-radius: 6px; font-size: 11px; font-weight: 700; padding: 3px 9px; }
+.check-body { padding: 24px; }
+.check-question { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.check-question:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.check-q-text { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.5; display: flex; gap: 10px; }
+.check-q-num { width: 24px; height: 24px; background: var(--surface2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+.check-options { display: flex; flex-direction: column; gap: 8px; }
+.check-option { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.18s; font-size: 14px; color: var(--text-muted); line-height: 1.4; }
+.check-option:hover:not(.locked) { border-color: rgba(26,107,204,0.35); color: var(--text); background: var(--surface3); }
+.check-option.selected { border-color: var(--accent); color: var(--text); background: rgba(26,107,204,0.06); }
+.check-option.correct { border-color: var(--accent-green); background: rgba(26,122,52,0.07); color: var(--accent-green); }
+.check-option.wrong { border-color: var(--accent-red); background: rgba(192,57,43,0.07); color: var(--accent-red); }
+.check-option.locked { cursor: default; }
+.check-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all 0.18s; }
+.check-option.selected .check-radio { border-color: var(--accent); background: var(--accent); }
+.check-option.correct .check-radio { border-color: var(--accent-green); background: var(--accent-green); }
+.check-option.wrong .check-radio { border-color: var(--accent-red); background: var(--accent-red); }
+.check-radio-dot { width: 6px; height: 6px; border-radius: 50%; background: white; display: none; }
+.check-option.selected .check-radio-dot, .check-option.correct .check-radio-dot, .check-option.wrong .check-radio-dot { display: block; }
+.check-feedback { margin-top: 10px; font-size: 13px; padding: 10px 14px; border-radius: 7px; line-height: 1.6; display: none; animation: fadeIn 0.25s ease; }
+.check-feedback.correct-fb { background: rgba(26,122,52,0.07); border: 1px solid rgba(26,122,52,0.2); color: #1a6630; }
+.check-feedback.wrong-fb { background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.2); color: #9b2c20; }
+.check-actions { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.check-score-mini { font-size: 13px; color: var(--text-muted); }
+.check-score-mini strong { color: var(--accent-gold); }
+.btn-check { background: var(--accent); color: #fff; border: none; padding: 11px 28px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.btn-check:hover { opacity: 0.88; }
+.btn-check:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-next-chapter { background: var(--accent-green); color: #fff; border: none; padding: 11px 28px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: none; gap: 6px; align-items: center; }
+.btn-next-chapter.show { display: flex; animation: fadeIn 0.3s ease; }
+.btn-next-chapter:hover { opacity: 0.88; }
+.completion-banner { background: linear-gradient(135deg, rgba(26,122,52,0.07), rgba(26,107,204,0.05)); border: 1px solid rgba(26,122,52,0.2); border-radius: 12px; padding: 24px; text-align: center; margin-top: 32px; display: none; animation: fadeIn 0.4s ease; }
+.completion-banner.show { display: block; }
+.completion-icon { font-size: 40px; margin-bottom: 12px; }
+.completion-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.completion-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+
+@media (max-width: 600px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .chapter-nav { display: none; }
+  .main { padding: 24px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Neuen Benutzer anlegen</div>
+    <div class="modal-input-wrap">
+      <label class="modal-label">Vorname</label>
+      <input class="modal-input" id="newUserInput" type="text" placeholder="z.B. Anna" maxlength="30"
+        onkeydown="if(event.key==='Enter') addUser()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm ghost" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-sm primary" onclick="addUser()">Anlegen</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-badge">BÖV</div>
+        <div class="brand-name">Allgemeine Themenbereiche</div>
+      </div>
+      <div class="user-switcher" onclick="toggleDropdown(event)" id="userSwitcherBtn">
+        <div class="user-avatar" id="sidebarAvatar" style="background:#dbeafe;color:#1a6bcc;">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Benutzer wählen</div>
+          <div class="user-progress-text" id="sidebarUserProgress">0 von 5 abgeschlossen</div>
+        </div>
+        <div class="user-chevron">▾</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div id="dropdownUserList"></div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-action" onclick="openModal()">＋ Neuen Benutzer anlegen</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <div class="chapter-nav-label">Kapitel</div>
+      <div id="chapterNavItems"></div>
+    </nav>
+
+    <div class="module-links">
+      <div class="chapter-nav-label">Weitere Module</div>
+      <a class="module-link" href="lebensversicherung.html">
+        <span class="module-link-icon">🛡️</span> Lebensversicherung
+      </a>
+      <a class="module-link" href="boev_lernprogramm.html">
+        <span class="module-link-icon">⚡</span> Quiz starten
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="quiz-btn" onclick="window.location.href='boev_lernprogramm.html'">⚡ Zum Quiz →</button>
+      <div class="overall-progress">
+        <div class="overall-bar"><div class="overall-fill" id="overallFill" style="width:0%"></div></div>
+        <div class="overall-label" id="overallLabel">0%</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent">
+    <div id="screenHome">
+      <div class="home-hero">
+        <div class="home-eyebrow">BÖV Außendienst-Prüfung · Modul 1</div>
+        <h1 class="home-title">Allgemeine<br>Themenbereiche</h1>
+        <p class="home-sub">Die Grundlage der BÖV-Prüfung: Versicherungsprinzipien, Rechtliches, Vertragstechnik und Prämien. 5 Kapitel mit Verständnisfragen — Fortschritt pro Benutzer gespeichert.</p>
+      </div>
+      <div class="module-overview" id="moduleOverview"></div>
+      <div style="font-size:13px;color:var(--text-muted);">👤 Wähle deinen Benutzer in der Seitenleiste, dann starte ein Kapitel.</div>
+    </div>
+    <div id="chapterScreens"></div>
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// KAPITEL-DATEN — aus WB1 Allgemeine Themenbereiche
+// ═══════════════════════════════════════════════════════
+const CHAPTERS = [
+  {
+    id: 'grundlagen',
+    title: 'Grundlagen des Versicherungswesens',
+    icon: '🏛️',
+    color: '#1a6bcc',
+    meta: '4 Abschnitte · ~8 Min',
+    intro: 'Was ist eine Risikogemeinschaft? Wie berechnet ein Versicherer Prämien, und wofür werden sie verwendet? Diese Einheit legt das Fundament für das gesamte Versicherungsverständnis.',
+    content: `
+      <div class="content-block">
+        <h3>Das Risiko und die Risikogemeinschaft</h3>
+        <p>Die Möglichkeit, dass ein Schaden eintritt, wird als <strong>Risiko</strong> bezeichnet. Man kann sich vor den finanziellen Auswirkungen im Vorhinein absichern.</p>
+        <div class="key-box">
+          <div class="key-box-label">Definition Risikogemeinschaft</div>
+          Personen, die von der gleichen Gefahr bedroht sind, schließen sich zusammen und vereinbaren, gemeinsam Schäden zu ersetzen, die bei einzelnen Mitgliedern entstanden sind. Der Schaden wird auf alle aufgeteilt — jedes Mitglied zahlt eine <strong>Prämie</strong>.
+        </div>
+        <p>Die Prämie ist das Entgelt für den Versicherungsschutz. Der Versicherer tritt als Mittelsmann zwischen Geschädigte und Gemeinschaft — er sammelt Prämien und zahlt im Schadensfall.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Voraussetzungen für versicherbare Gefahren</h3>
+        <p>Nicht jedes Risiko ist versicherbar. Ein versicherbares Ereignis muss folgende Eigenschaften aufweisen:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Zufälligkeit:</strong> Das Ereignis ist weder bekannt noch beeinflussbar — es liegt dem Zufall überlassen (Ursache, Zeitpunkt oder Schadenshöhe).</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Eindeutigkeit:</strong> Der Eintritt des Versicherungsfalles und die daraus folgende Leistung müssen klar feststellbar sein.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Schätzbarkeit:</strong> Die Schadenshöhe muss aufgrund von Wahrscheinlichkeiten vorher bestimmbar sein.</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Unabhängigkeit:</strong> Ein Schadensfall darf andere Schadensfälle nicht wahrscheinlicher machen.</div></div>
+          <div class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Größe:</strong> Das Risiko darf nicht so groß sein, dass ein Risikoausgleich unmöglich wird.</div></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Prämienberechnung: Schadensstatistik & Gesetz der großen Zahl</h3>
+        <p>Die Prämienberechnung basiert auf zwei Grundlagen:</p>
+        <div class="key-box gold">
+          <div class="key-box-label">Schadensstatistik</div>
+          Durch jahrelange Aufzeichnungen wird der <strong>statistische Durchschnitt plus die durchschnittliche Schwankung</strong> für gleichartige Risiken ermittelt. Jedes Risiko wird separat erfasst (z.B. Feuer nach Bauweise, Landwirtschaft nach Gebäude/Maschinen getrennt).
+        </div>
+        <div class="key-box">
+          <div class="key-box-label">Gesetz der großen Zahl (Jakob Bernoulli)</div>
+          Der Einfluss des Zufalls auf die Wahrscheinlichkeit eines Ereignisses wird <strong>kleiner, je größer die Anzahl der untersuchten Fälle</strong> ist. Daher: Je größer der Versicherungsbestand, desto verlässlicher die Schadensvorhersage. Risikostreuung ist entscheidend.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Prämienverwendung</h3>
+        <p>Der Versicherer dient als <strong>Kapitalsammelstelle</strong>. Die eingenommenen Prämien müssen:</p>
+        <div class="pill-list">
+          <span class="pill">Versicherungsleistungen abdecken</span>
+          <span class="pill">Reserven bilden</span>
+          <span class="pill">Betriebskosten decken</span>
+          <span class="pill">Kapitalanlage ermöglichen</span>
+        </div>
+        <p>Die gewinnbringende Anlage der Gelder (Kredite, Wertpapiere, Vermietung) wird als <strong>Kapitalanlagegeschäft</strong> bezeichnet.</p>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Was ist eine Risikogemeinschaft?",
+        options: [
+          "Eine staatliche Einrichtung zur Schadensverhütung",
+          "Personen mit gleicher Gefahr, die vereinbaren gemeinsam Schäden zu ersetzen und je eine Prämie zahlen",
+          "Eine Gruppe von Versicherungsunternehmen",
+          "Eine gesetzlich vorgeschriebene Versicherungsform"
+        ],
+        correct: 1,
+        feedback: "Eine <strong>Risikogemeinschaft</strong> entsteht, wenn sich Personen mit gleicher Gefahr zusammenschließen und vereinbaren, gemeinsam Schäden zu ersetzen. Jedes Mitglied zahlt einen Beitrag (Prämie). Der Versicherer tritt als Mittelsmann auf."
+      },
+      {
+        q: "Was besagt das Gesetz der großen Zahl?",
+        options: [
+          "Je mehr Schäden eintreten, desto höher wird die Prämie",
+          "Der Einfluss des Zufalls auf die Schadenswahrscheinlichkeit wird kleiner, je größer die Anzahl der untersuchten Fälle ist",
+          "Versicherungsunternehmen müssen mindestens 1.000 Verträge haben",
+          "Große Schäden sind seltener als kleine Schäden"
+        ],
+        correct: 1,
+        feedback: "Das Gesetz der großen Zahl (Jakob Bernoulli) besagt: Der Einfluss des Zufalls wird <strong>kleiner, je mehr Fälle beobachtet werden</strong>. Daher trachtet der Versicherer danach, seinen Bestand zu vergrößern und eine breite Risikostreuung zu haben."
+      },
+      {
+        q: "Welche Eigenschaft bedeutet, dass ein Schadensereignis keinen anderen Schadensfall wahrscheinlicher machen darf?",
+        options: [
+          "Zufälligkeit",
+          "Eindeutigkeit",
+          "Unabhängigkeit",
+          "Schätzbarkeit"
+        ],
+        correct: 2,
+        feedback: "<strong>Unabhängigkeit</strong> bedeutet, dass ein Versicherungsfall (Schadensereignis) nicht bewirken darf, dass andere Versicherungsfälle wahrscheinlicher werden. Das ist eine der fünf Voraussetzungen für ein versicherbares Risiko."
+      }
+    ]
+  },
+
+  {
+    id: 'organisationsformen',
+    title: 'Organisationsformen & Rechtliche Grundlagen',
+    icon: '⚖️',
+    color: '#6d3fbf',
+    meta: '5 Abschnitte · ~10 Min',
+    intro: 'Sozialversicherung vs. Privatversicherung, Erst- und Rückversicherung, die wichtigsten Rechtsquellen und die Rolle der Versicherungsaufsicht.',
+    content: `
+      <div class="content-block">
+        <h3>Sozialversicherung vs. Privatversicherung</h3>
+        <table class="compare-table">
+          <thead><tr><th>Merkmal</th><th>Sozialversicherung</th><th>Privatversicherung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Entstehung</strong></td><td>Kraft Gesetz (Pflicht)</td><td>Freiwilliger Vertrag</td></tr>
+            <tr><td><strong>Risiken</strong></td><td>Nur Personen</td><td>Personen + Vermögen</td></tr>
+            <tr><td><strong>Leistungen</strong></td><td>Gesetzlich festgelegt (Geld + Naturalleistungen)</td><td>Vertraglich, fast nur Geldleistungen</td></tr>
+            <tr><td><strong>Finanzierung</strong></td><td>Arbeitgeber + Arbeitnehmer + Bundeszuschuss; nach Einkommen</td><td>Prämien des VN; nach Risiko</td></tr>
+            <tr><td><strong>Prinzip</strong></td><td>Solidaritätsprinzip</td><td>Äquivalenzprinzip</td></tr>
+            <tr><td><strong>Verfahren</strong></td><td>Umlageverfahren</td><td>Kapitaldeckungsverfahren</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Erst-, Rück- und Mitversicherung</h3>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Erstversicherer:</strong> Schließt Versicherungsverträge direkt mit dem Versicherungsnehmer ab (primäre Risikoteilung / direktes Geschäft).</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Mitversicherung:</strong> Mehrere Erstversicherer gewähren gemeinsamen Versicherungsschutz. Der VN weiß davon — alle Versicherer scheinen in der Polizze auf.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Rückversicherung:</strong> Ein Erstversicherer versichert sich selbst bei einem anderen Versicherer (sekundäre Risikoteilung / indirektes Geschäft). Der VN kennt den Rückversicherer nicht.</div></div>
+        </div>
+        <div class="key-box purple">
+          <div class="key-box-label">Retrozession</div>
+          Wenn auch dem Rückversicherer ein Risiko zu groß ist, sucht er seinerseits Versicherungsschutz. Die Rückversicherung eines Rückversicherers nennt man <strong>Retrozession</strong>.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Stufenbau der Rechtsquellen</h3>
+        <p>Alle Rechtsquellen bilden die Grundlage des Versicherungsvertrages — die spezifischeren gehen den allgemeinen vor:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Allgemeine Rechtsquellen:</strong> ABGB, UGB, KSchG, DSG, EKHG</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Besondere Rechtsquellen:</strong> VersVG (Versicherungsvertragsgesetz), VAG (Versicherungsaufsichtsgesetz)</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>AVB:</strong> Allgemeine Versicherungsbedingungen (spezifisch je Sparte)</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Besondere Bedingungen, Klauseln, Einzelvereinbarungen</strong></div></div>
+        </div>
+        <div class="key-box gold">
+          <div class="key-box-label">AVB — wichtig</div>
+          AVB sind keine Gesetze, aber sie haben <strong>gesetzesähnlichen Charakter</strong> — sie gelten auch, wenn der VN sie nicht kennt (Unterwerfungsvertrag). Jeder Versicherer kann eigene AVB gestalten.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Versicherungsaufsichtsbehörde</h3>
+        <p>Versicherungsunternehmen unterliegen einer strengen Aufsicht durch die <strong>Finanzmarktaufsicht (FMA)</strong>. Oberstes Organ ist der Bundesminister für Finanzen.</p>
+        <p>Aufgaben: Überwachung der Finanzgebarung, Vertretung der VN-Interessen, Einhaltung der Vorschriften. Kosten der Aufsicht tragen die Versicherungsunternehmen.</p>
+        <div class="key-box green">
+          <div class="key-box-label">EU-Niederlassungsfreiheit</div>
+          Seit September 1994: Versicherungsunternehmen aus EU-Mitgliedstaaten können in anderen Mitgliedstaaten tätig sein — ohne langwierige Genehmigungsverfahren (<strong>Niederlassungs- und Dienstleistungsfreiheit</strong>).
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Versicherungszweige — Gliederung</h3>
+        <table class="compare-table">
+          <thead><tr><th>Kategorie</th><th>Beispiele</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Personenversicherung</strong></td><td>Lebensversicherung, Krankenversicherung, Unfallversicherung</td></tr>
+            <tr><td><strong>Sachversicherung</strong> (Vermögensversicherung i.w.S.)</td><td>Fahrzeuge, Transporte, Naturereignisse, Tierversicherung</td></tr>
+            <tr><td><strong>Vermögensversicherung i.e.S.</strong></td><td>Haftpflicht, KFZ-Haftpflicht, Rechtsschutz, Kreditversicherung</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Was ist der Hauptunterschied zwischen Sozialversicherung und Privatversicherung hinsichtlich des Entstehens?",
+        options: [
+          "Die Sozialversicherung ist freiwillig, die Privatversicherung gesetzlich verpflichtend",
+          "Die Sozialversicherung entsteht kraft Gesetzes (Pflicht), die Privatversicherung durch freiwilligen Vertrag",
+          "Beide entstehen durch freiwilligen Vertrag",
+          "Beide sind gesetzlich verpflichtend"
+        ],
+        correct: 1,
+        feedback: "Die <strong>Sozialversicherung</strong> entsteht kraft Gesetzes — sie ist Pflicht, sobald bestimmte gesetzliche Tatbestände zutreffen. Die <strong>Privatversicherung</strong> beruht auf einem freiwilligen Vertrag (Antrag des VN)."
+      },
+      {
+        q: "Was unterscheidet Rückversicherung von Mitversicherung?",
+        options: [
+          "Bei der Mitversicherung kennt der VN die beteiligten Versicherer nicht; bei der Rückversicherung schon",
+          "Bei der Mitversicherung scheinen alle Versicherer in der Polizze auf und der VN weiß davon; beim Rückversicherer nicht",
+          "Rückversicherung ist nur für Lebensversicherungen zulässig",
+          "Mitversicherung ist nur zwischen Rückversicherern möglich"
+        ],
+        correct: 1,
+        feedback: "Bei der <strong>Mitversicherung</strong> weiß der VN von der Aufteilung — alle Versicherer scheinen in der Polizze auf. Bei der <strong>Rückversicherung</strong> kennt der VN den Rückversicherer nicht — sie ist dem VN gegenüber unsichtbar (indirektes Geschäft)."
+      },
+      {
+        q: "Welche Aussage zu den AVB ist korrekt?",
+        options: [
+          "AVB sind Gesetze und müssen vom Parlament beschlossen werden",
+          "AVB gelten nur, wenn der Versicherungsnehmer sie ausdrücklich akzeptiert hat",
+          "AVB haben gesetzesähnlichen Charakter und gelten auch, wenn der VN sie nicht kennt",
+          "AVB sind für alle Versicherer identisch"
+        ],
+        correct: 2,
+        feedback: "AVB haben <strong>gesetzesähnlichen Charakter</strong> — sie sind Vertragsbestandteil, auch wenn der VN sie nicht kennt (Unterwerfungsvertrag). Jeder Versicherer kann eigene AVB gestalten, weshalb sie sich von Unternehmen zu Unternehmen unterscheiden können."
+      }
+    ]
+  },
+
+  {
+    id: 'vertragspersonen',
+    title: 'Personen des Versicherungsvertrages',
+    icon: '👥',
+    color: '#b07d0a',
+    meta: '4 Abschnitte · ~10 Min',
+    intro: 'Wer ist Versicherungsnehmer, versicherte Person, Begünstigter? Was sind Zession, Verpfändung, Vinkulierung? Und welche Vollmachten hat ein Vermittlungsagent?',
+    content: `
+      <div class="content-block">
+        <h3>Die Vertragspartner</h3>
+        <table class="compare-table">
+          <thead><tr><th>Person</th><th>Rolle</th><th>Besonderheit</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Versicherer (VR)</strong></td><td>Übernimmt Risiko gegen Prämie, leistet im Schadensfall</td><td>Nur AG oder Versicherungsverein auf Gegenseitigkeit (VVaG)</td></tr>
+            <tr><td><strong>Versicherungsnehmer (VN)</strong></td><td>Schließt Vertrag ab, zahlt Prämie, ist "Herr des Vertrages"</td><td>Kann auch für fremdes Interesse abschließen (Fremdversicherung)</td></tr>
+            <tr><td><strong>Versicherte Person</strong></td><td>Das versicherte Risiko / die Gefahrenperson</td><td>Muss bei LV dem Vertrag zugestimmt haben</td></tr>
+            <tr><td><strong>Bezugsberechtigter</strong></td><td>Empfängt die Versicherungsleistung</td><td>Widerruflich oder unwiderruflich</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Bezugsrecht — vier Formen</h3>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Widerruflich + bestimmt:</strong> Namentlich genannte Person, vom VN jederzeit änderbar (z.B. "Josef Maier, geb. 18.12.1961")</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Widerruflich + unbestimmt:</strong> Keine namentlich genannte Person, änderbar (z.B. "meine gesetzlichen Erben")</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Unwiderruflich + bestimmt:</strong> Namentlich, NUR mit Zustimmung des Bezugsberechtigten änderbar</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Unwiderruflich + unbestimmt:</strong> Ohne Name, nicht ohne Zustimmung änderbar</div></div>
+        </div>
+        <div class="key-box red">
+          <div class="key-box-label">Wichtig: Bezugsrecht "gesetzliche Erben"</div>
+          Die Verfügung "gesetzliche Erben" ist ungünstig — erst im Zuge der Verlassenschaftsabhandlung werden die Erben festgestellt, was die Auszahlung verzögert. Besser: namentliches Bezugsrecht.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Zession, Verpfändung, Vinkulierung</h3>
+        <table class="compare-table">
+          <thead><tr><th></th><th>Zession (Abtretung)</th><th>Verpfändung</th><th>Vinkulierung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Was passiert</strong></td><td>Alle Rechte gehen auf Dritten über</td><td>Gläubiger erhält Pfandrecht an Versicherungsansprüchen</td><td>Auszahlung gesperrt bis Einigung</td></tr>
+            <tr><td><strong>Steuerwirkung LV</strong></td><td>Wie VN-Wechsel — steuerschädlich innerhalb 20 Jahre</td><td>Steuerschädlich wenn Erlebensvertrag < 10 Jahre alt</td><td>Nicht steuerschädlich (§18 EStG)</td></tr>
+            <tr><td><strong>Für VN</strong></td><td>Ungünstiger als Verpfändung</td><td>Pfandgläubiger kann nicht kündigen</td><td>VN bleibt Vertragspartner</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Versicherungsvermittler — Vollmachten</h3>
+        <table class="compare-table">
+          <thead><tr><th></th><th>Abschlussagent</th><th>Vermittlungsagent</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Vollmacht</strong></td><td>Kann Verträge abschließen, ändern, kündigen</td><td>Nur Empfangsvollmacht — nimmt Anträge und Erklärungen entgegen</td></tr>
+            <tr><td><strong>Praxis Österreich</strong></td><td>Kommt in der Praxis nicht vor</td><td>Standard: haupt-/nebenberufliche AD-Mitarbeiter</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box">
+          <div class="key-box-label">Kenntniszurechnung</div>
+          Dem Versicherer wird die <strong>berufliche Kenntnis des zuständigen Vermittlungsagenten</strong> zugerechnet — aber nur das Wissen aus der Vertragsbearbeitung, nicht privat erworbenes Wissen.
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Was ist ein unwiderrufliches Bezugsrecht?",
+        options: [
+          "Ein Bezugsrecht, das automatisch nach 10 Jahren unwirksam wird",
+          "Ein Bezugsrecht, das der VN nur mit ausdrücklicher Zustimmung des Bezugsberechtigten ändern kann",
+          "Ein Bezugsrecht zugunsten gesetzlicher Erben",
+          "Ein Bezugsrecht, das nur der Versicherer ändern kann"
+        ],
+        correct: 1,
+        feedback: "Beim <strong>unwiderruflichen Bezugsrecht</strong> kann der VN das Bezugsrecht nur noch mit <strong>ausdrücklicher Zustimmung des Bezugsberechtigten</strong> ändern. Der Bezugsberechtigte erwirbt das Recht auf Leistung bereits mit der Mitteilung der Bezugsberechtigung."
+      },
+      {
+        q: "Welche Vertragssperre ist nach EStG §18 NICHT steuerschädlich?",
+        options: [
+          "Zession innerhalb von 20 Jahren",
+          "Verpfändung eines Erlebensvertrages unter 10 Jahren",
+          "Vinkulierung",
+          "Alle Vertragssperren sind steuerschädlich"
+        ],
+        correct: 2,
+        feedback: "<strong>Vinkulierungen</strong> sind nach EStG §18 nicht steuerschädlich. Die Zession gilt als VN-Wechsel und ist innerhalb von 20 Jahren steuerschädlich. Verpfändungen von Erlebensverträgen sind steuerschädlich, wenn der Vertrag weniger als 10 Jahre gelaufen ist."
+      },
+      {
+        q: "Welche Vollmacht hat ein Vermittlungsagent?",
+        options: [
+          "Er kann Versicherungsverträge abschließen und kündigen",
+          "Er hat nur Empfangsvollmacht — er nimmt Anträge und Erklärungen entgegen, kann aber keine rechtsverbindlichen Erklärungen abgeben",
+          "Er hat keine Vollmacht und handelt immer im eigenen Namen",
+          "Er kann Deckungszusagen in unbegrenzter Höhe erteilen"
+        ],
+        correct: 1,
+        feedback: "Der <strong>Vermittlungsagent</strong> hat nur <strong>Empfangsvollmacht</strong>: Er nimmt Anträge, Anzeigen, Kündigungs- und Rücktrittserklärungen entgegen und kann Polizzen aushändigen sowie Prämien kassieren (mit VR-unterzeichneter Rechnung). Rechtsverbindliche Erklärungen wie Deckungszusagen darf er nicht abgeben."
+      }
+    ]
+  },
+
+  {
+    id: 'versicherungsvertrag',
+    title: 'Der Versicherungsvertrag',
+    icon: '📄',
+    color: '#1a7a34',
+    meta: '5 Abschnitte · ~10 Min',
+    intro: 'Wie kommt ein Versicherungsvertrag zustande? Was enthält die Polizze? Wann beginnt der Versicherungsschutz, und wie wird der Vertrag beendet?',
+    content: `
+      <div class="content-block">
+        <h3>Besonderheiten des Versicherungsvertrages</h3>
+        <div class="pill-list">
+          <span class="pill">Dauerschuldverhältnis</span>
+          <span class="pill">Unsichtbare Ware</span>
+          <span class="pill">Freiwilligkeit (ggü. Sozialversicherung)</span>
+          <span class="pill">Massenvertrag</span>
+          <span class="pill">Unterwerfungsvertrag</span>
+        </div>
+        <div class="key-box">
+          <div class="key-box-label">Antragsbindefrist</div>
+          Der Antragsteller ist nach Übergabe des Antrages an den Vermittler <strong>6 Wochen</strong> gebunden (gesetzliche Höchstfrist). Die Frist beginnt mit Übergabe an den Vermittler — NICHT mit dem Eingangsstempel in der Zentrale.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Inhalt der Polizze</h3>
+        <p>Die Polizze muss mindestens enthalten:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">•</div><div class="step-content">Name und Anschrift von Versicherer und Versicherungsnehmer</div></div>
+          <div class="step-item"><div class="step-num">•</div><div class="step-content">Versicherungssparte, versicherte Sache oder Person</div></div>
+          <div class="step-item"><div class="step-num">•</div><div class="step-content">Versicherungssumme / Leistungsumfang</div></div>
+          <div class="step-item"><div class="step-num">•</div><div class="step-content">Vertragsbeginn und -ablauf</div></div>
+          <div class="step-item"><div class="step-num">•</div><div class="step-content">Prämie, Zahlungsweise, Fälligkeit</div></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Beginn des Versicherungsschutzes</h3>
+        <table class="compare-table">
+          <thead><tr><th>Begriff</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Formeller Beginn</strong></td><td>Beginn des Vertragsverhältnisses = Annahme des Antrages (Polizzenerhalt)</td></tr>
+            <tr><td><strong>Materieller Beginn</strong></td><td>Beginn des Versicherungsschutzes = nach Zahlung der Erstprämie</td></tr>
+            <tr><td><strong>Technischer Beginn</strong></td><td>Beginn des prämienbelasteten Zeitraumes = Datum in der Polizze</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box gold">
+          <div class="key-box-label">Mittagsregel (§7 VersVG)</div>
+          Haben die Parteien keinen Beginnzeitpunkt vereinbart, beginnt der Versicherungsschutz zu <strong>Mittag des Tages des Vertragsabschlusses</strong>. In der Praxis wird ausdrücklich <strong>0 Uhr</strong> vereinbart.
+        </div>
+        <div class="key-box">
+          <div class="key-box-label">Vorläufige Deckungszusage</div>
+          Ein selbständiger kurzfristiger Versicherungsvertrag für sofortigen Schutz vor der endgültigen Risikoprüfung — auch ohne vorherige Prämienzahlung. Endet spätestens 6 Wochen nach Antragstellung.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Beendigung des Versicherungsvertrages</h3>
+        <table class="compare-table">
+          <thead><tr><th>Art</th><th>Wirkung</th><th>Beispiele</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kündigung</strong></td><td>Für Gegenwart/Zukunft (nicht rückwirkend)</td><td>Ordentlich (mit Frist) oder außerordentlich (aus besonderem Grund)</td></tr>
+            <tr><td><strong>Rücktritt</strong></td><td>Rückwirkend — als ob Vertrag nie abgeschlossen</td><td>§5b VersVG: Antragskopie fehlt, AVB nicht übergeben</td></tr>
+            <tr><td><strong>Zeitablauf</strong></td><td>Automatisch bei befristetem Vertrag</td><td>Reiseversicherung für 1 Monat</td></tr>
+            <tr><td><strong>Veräußerung</strong></td><td>Vertrag geht auf Erwerber über</td><td>Hausverkauf: Erwerber tritt in Feuerversicherung ein</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box red">
+          <div class="key-box-label">Rücktrittsfristen §5b VersVG</div>
+          Variante 1 (Polizze + AVB + Belehrung): <strong>2 Wochen</strong>. Variante 2 (ohne AVB, aber Belehrung): <strong>1 Monat</strong>. Variante 3 (ohne Belehrung): <strong>unbefristetes</strong> Rücktrittsrecht.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Billigungsklausel (§5 VersVG)</h3>
+        <p>Weicht die Polizze vom Antrag ab, muss der Versicherer <strong>deutlich auf die Abweichung hinweisen</strong>. Der VN kann:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Schriftlich widersprechen</strong> innerhalb 1 Monat → Vertrag kommt nicht zustande</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Ausdrücklich zustimmen</strong> → Polizzeninhalt gilt</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Keine Reaktion</strong> → nach 1 Monat gilt Polizzeninhalt als genehmigt</div></div>
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Wann beginnt die 6-wöchige Antragsbindefrist?",
+        options: [
+          "Mit dem Eingangsstempel in der Generaldirektion",
+          "Mit Übergabe des Antrages an den Vermittler",
+          "Mit der Ausstellung der Polizze",
+          "Mit der ersten Prämienzahlung"
+        ],
+        correct: 1,
+        feedback: "Die Antragsbindefrist beginnt mit der <strong>Übergabe des Antrages an den Vermittler</strong> — NICHT mit dem Eingangsstempel in der Geschäftsstelle oder Zentrale. Die Frist beträgt einheitlich 6 Wochen (gesetzliche Höchstfrist)."
+      },
+      {
+        q: "Was gilt, wenn kein Versicherungsbeginn vereinbart wurde (§7 VersVG)?",
+        options: [
+          "Der Versicherungsschutz beginnt erst nach Zahlung der Erstprämie",
+          "Der Versicherungsschutz beginnt zu Mittag des Tages des Vertragsabschlusses",
+          "Der Versicherungsschutz beginnt am ersten des Folgemonats",
+          "Es besteht kein Versicherungsschutz ohne explizite Vereinbarung"
+        ],
+        correct: 1,
+        feedback: "Die <strong>Mittagsregel</strong> (§7 VersVG) besagt: Fehlt eine Vereinbarung über den Beginnzeitpunkt, beginnt der Versicherungsschutz zu <strong>Mittag des Tages des Vertragsabschlusses</strong>. In der Praxis vereinbart man ausdrücklich 0 Uhr."
+      },
+      {
+        q: "Was passiert, wenn der VN auf eine Polizzenabweichung innerhalb eines Monats NICHT reagiert?",
+        options: [
+          "Der Vertrag kommt nicht zustande",
+          "Es gilt der Inhalt des ursprünglichen Antrages",
+          "Der abweichende Polizzeninhalt gilt als genehmigt",
+          "Der Versicherer muss eine neue Polizze ausstellen"
+        ],
+        correct: 2,
+        feedback: "Gemäß <strong>Billigungsklausel (§5 VersVG)</strong>: Reagiert der VN nicht innerhalb von 1 Monat, gilt der <strong>abweichende Polizzeninhalt als genehmigt</strong>. Nur ein schriftlicher Widerspruch innerhalb der Frist verhindert das Zustandekommen des Vertrages zu den abweichenden Bedingungen."
+      }
+    ]
+  },
+
+  {
+    id: 'praemien_pflichten',
+    title: 'Rechte, Pflichten & Prämien',
+    icon: '💰',
+    color: '#c0392b',
+    meta: '4 Abschnitte · ~10 Min',
+    intro: 'Rechtspflichten vs. Obliegenheiten, vorvertragliche Anzeigepflicht, Gefahrenerhöhung — und die Regeln rund um die Versicherungsprämie inkl. Prämienzahlungsverzug.',
+    content: `
+      <div class="content-block">
+        <h3>Rechtspflichten vs. Obliegenheiten</h3>
+        <table class="compare-table">
+          <thead><tr><th></th><th>Rechtspflichten</th><th>Obliegenheiten</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Durchsetzbarkeit</strong></td><td>Gerichtlich erzwingbar (Klage)</td><td>Nicht erzwingbar</td></tr>
+            <tr><td><strong>Konsequenz bei Verletzung</strong></td><td>Schadenersatzpflicht</td><td>Verlust des Versicherungsschutzes (Leistungsfreiheit)</td></tr>
+            <tr><td><strong>Beispiel VN</strong></td><td>Prämienzahlung</td><td>Vorvertragliche Anzeigepflicht, Schadensmeldung</td></tr>
+            <tr><td><strong>Beispiel VR</strong></td><td>Versicherungsleistung erbringen</td><td>Antragsdurchschrift aushändigen, AVB übergeben</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box">
+          <div class="key-box-label">4 Grundsätze des Obliegenheitsrechts</div>
+          <strong>Verschuldenprinzip</strong> · <strong>Kausalitätsprinzip</strong> (Verletzung muss für Schaden ursächlich sein) · <strong>Klarstellungsprinzip</strong> (VR muss Leistungsfreiheit mitteilen) · <strong>Aliquote Leistungsfreiheit</strong>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Vorvertragliche Anzeigepflicht (§16-22 VersVG)</h3>
+        <p>Der VN muss dem Versicherer vor Vertragsabschluss alle <strong>gefahrenerheblichen Umstände</strong> anzeigen.</p>
+        <div class="key-box gold">
+          <div class="key-box-label">Konsequenzen bei Verletzung</div>
+          Der Versicherer kann binnen <strong>1 Monat ab Kenntnis</strong> vom Vertrag zurücktreten. Bei präzis gestellten Antragsfragen schadet bereits <strong>leichte Fahrlässigkeit</strong>. Bei spontaner Anzeigepflicht (keine Fragen gestellt) erst ab grober Fahrlässigkeit / Vorsatz.
+        </div>
+        <p>Lässt der VN eine Antragsfrage unbeantwortet, gilt das <strong>nicht als Verneinung</strong> — der VR muss nochmals nachfragen.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Unterversicherung, Überversicherung, Doppelversicherung</h3>
+        <div class="key-box red">
+          <div class="key-box-label">Unterversicherung — Formel</div>
+          Wenn Versicherungssumme &lt; Versicherungswert:<br>
+          <strong>Entschädigung = Schaden × Versicherungssumme ÷ Versicherungswert</strong><br>
+          Beispiel: Gebäude Neuwert €146.000, versichert €73.000, Schaden €1.450 → Entschädigung = €725
+        </div>
+        <div class="key-box green">
+          <div class="key-box-label">Doppelversicherung</div>
+          Dieselbe Sache bei mehreren Versicherern sodass die Gesamtversicherungssumme den Versicherungswert übersteigt. Jeder Versicherer leistet aliquot — der VN erhält nie mehr als den tatsächlichen Schaden (<strong>Bereicherungsverbot</strong>).
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Erstprämie und Folgeprämie — Verzug</h3>
+        <table class="compare-table">
+          <thead><tr><th></th><th>Erstprämie (§38 VersVG)</th><th>Folgeprämie (§39 VersVG)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Frist</strong></td><td>14 Tage Respirofrist nach qualifizierter Aufforderung</td><td>14 Tage Nachfrist nach qualifizierter Mahnung (Feuer-Gebäude: 1 Monat)</td></tr>
+            <tr><td><strong>Konsequenz</strong></td><td>VR kann zurücktreten + Leistungsfreiheit</td><td>VR kann kündigen + Leistungsfreiheit</td></tr>
+            <tr><td><strong>Reaktivierung</strong></td><td>—</td><td>Innerhalb 1 Monat nach Nachfrist möglich</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box">
+          <div class="key-box-label">Bagatellverzug (§39a VersVG)</div>
+          Bei Verzug mit max. <strong>10% der Jahresprämie, höchstens €60</strong> bleibt die Leistungspflicht des Versicherers bestehen.
+        </div>
+        <div class="key-box gold">
+          <div class="key-box-label">Versicherungssteuer — Kernsätze</div>
+          Sachversicherungen: <strong>11%</strong> · Lebensversicherungen (laufend): <strong>4%</strong> · Krankenversicherung: <strong>1%</strong> · Pensionskassen: <strong>2,5%</strong> · Hagelversicherung: <strong>0,2‰ der VS</strong>
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Was ist der entscheidende Unterschied zwischen Rechtspflichten und Obliegenheiten?",
+        options: [
+          "Rechtspflichten gelten nur für den Versicherer, Obliegenheiten nur für den VN",
+          "Rechtspflichten sind gerichtlich erzwingbar; Obliegenheiten nicht — ihre Verletzung führt zur Leistungsfreiheit",
+          "Obliegenheiten sind gesetzlich, Rechtspflichten vertraglich geregelt",
+          "Es gibt keinen wesentlichen Unterschied"
+        ],
+        correct: 1,
+        feedback: "<strong>Rechtspflichten</strong> können auf dem Gerichtsweg erzwungen werden (z.B. Prämienzahlung). <strong>Obliegenheiten</strong> sind nicht erzwingbar — ihre Verletzung führt jedoch zum <strong>Verlust des Versicherungsschutzes</strong> (Leistungsfreiheit des VR)."
+      },
+      {
+        q: "Ein Gebäude hat einen Neuwert von €200.000, ist aber nur mit €100.000 versichert. Es entsteht ein Schaden von €10.000. Wie hoch ist die Entschädigung?",
+        options: [
+          "€10.000 (volle Entschädigung)",
+          "€5.000 (anteilige Entschädigung wegen Unterversicherung)",
+          "€0 (Leistungsfreiheit wegen Unterversicherung)",
+          "€100.000 (Versicherungssumme)"
+        ],
+        correct: 1,
+        feedback: "Unterversicherungsformel: Schaden × VS ÷ VW = €10.000 × €100.000 ÷ €200.000 = <strong>€5.000</strong>. Durch die Unterversicherung (VS < VW) trägt der VN die Hälfte des Schadens selbst."
+      },
+      {
+        q: "Wie hoch ist die Versicherungssteuer bei einer laufenden Lebensversicherung?",
+        options: [
+          "11%",
+          "1%",
+          "4%",
+          "2,5%"
+        ],
+        correct: 2,
+        feedback: "Bei <strong>laufenden Lebensversicherungen</strong> beträgt die Versicherungssteuer <strong>4%</strong>. Bei Kapitalversicherungen gegen Einmalprämie mit einer Laufzeit unter 15 Jahren sind es 11%. Krankenversicherung: 1%, Pensionskassen: 2,5%."
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════
+// PERSISTENZ
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY = 'boev_wb1_v1';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { users: [], activeUser: null }; }
+  catch(e) { return { users: [], activeUser: null }; }
+}
+
+function saveData(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function setChapterDone(userId, chapterId, score, total) {
+  const data = loadData();
+  const user = data.users.find(u => u.id === userId);
+  if (!user) return;
+  if (!user.progress) user.progress = {};
+  user.progress[chapterId] = { done: true, score, total, ts: Date.now() };
+  saveData(data);
+}
+
+// ═══════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════
+let appData = loadData();
+let activeUser = appData.activeUser;
+let currentChapter = null;
+let checkAnswers = {};
+
+const AVATAR_COLORS = [
+  ['#dbeafe','#1a6bcc'],['#dcfce7','#1a7a34'],['#f3e8ff','#6d3fbf'],
+  ['#fef9c3','#b07d0a'],['#fee2e2','#c0392b'],['#e0f2fe','#0369a1']
+];
+
+function getAvatarStyle(name) {
+  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[idx];
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  appData = loadData();
+  activeUser = appData.activeUser;
+  buildChapterNav();
+  buildChapterScreens();
+  buildHomeOverview();
+  updateSidebarUser();
+  buildUserDropdown();
+}
+
+// ═══════════════════════════════════════════════════════
+// USER MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function buildUserDropdown() {
+  const list = document.getElementById('dropdownUserList');
+  list.innerHTML = '';
+  appData.users.forEach(u => {
+    const [bg, color] = getAvatarStyle(u.name);
+    const done = Object.values(u.progress || {}).filter(p => p.done).length;
+    const div = document.createElement('div');
+    div.className = 'dropdown-user-item' + (activeUser === u.id ? ' active' : '');
+    div.innerHTML = `<div class="user-avatar" style="background:${bg};color:${color};font-size:13px;">${u.name.charAt(0).toUpperCase()}</div>
+      <div><div style="font-weight:700;font-size:13px;">${u.name}</div>
+      <div style="font-size:11px;color:var(--text-muted)">${done} / ${CHAPTERS.length} Kapitel</div></div>`;
+    div.onclick = (e) => { e.stopPropagation(); selectUser(u.id); };
+    list.appendChild(div);
+  });
+}
+
+function selectUser(id) {
+  appData = loadData();
+  appData.activeUser = id;
+  activeUser = id;
+  saveData(appData);
+  document.getElementById('userDropdown').classList.remove('open');
+  updateSidebarUser();
+  buildUserDropdown();
+  buildChapterNav();
+  buildHomeOverview();
+  buildChapterScreens();
+  showHome();
+}
+
+function updateSidebarUser() {
+  appData = loadData();
+  const user = appData.users.find(u => u.id === activeUser);
+  if (!user) {
+    document.getElementById('sidebarAvatar').textContent = '?';
+    document.getElementById('sidebarUserName').textContent = 'Benutzer wählen';
+    document.getElementById('sidebarUserProgress').textContent = '0 von ' + CHAPTERS.length + ' abgeschlossen';
+    document.getElementById('overallFill').style.width = '0%';
+    document.getElementById('overallLabel').textContent = '0%';
+    return;
+  }
+  const [bg, color] = getAvatarStyle(user.name);
+  const av = document.getElementById('sidebarAvatar');
+  av.style.background = bg; av.style.color = color;
+  av.textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('sidebarUserName').textContent = user.name;
+  const done = Object.values(user.progress || {}).filter(p => p.done).length;
+  document.getElementById('sidebarUserProgress').textContent = done + ' von ' + CHAPTERS.length + ' abgeschlossen';
+  const pct = Math.round((done / CHAPTERS.length) * 100);
+  document.getElementById('overallFill').style.width = pct + '%';
+  document.getElementById('overallLabel').textContent = pct + '%';
+}
+
+function toggleDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('userDropdown').classList.toggle('open');
+}
+document.addEventListener('click', () => { document.getElementById('userDropdown').classList.remove('open'); });
+
+function openModal() {
+  document.getElementById('userDropdown').classList.remove('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('newUserInput').focus(), 100);
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('newUserInput').value = '';
+}
+function addUser() {
+  const name = document.getElementById('newUserInput').value.trim();
+  if (!name) return;
+  appData = loadData();
+  const id = 'u_' + Date.now();
+  appData.users.push({ id, name, progress: {} });
+  appData.activeUser = id;
+  activeUser = id;
+  saveData(appData);
+  closeModal();
+  updateSidebarUser();
+  buildUserDropdown();
+  buildChapterNav();
+  buildHomeOverview();
+  buildChapterScreens();
+  showHome();
+}
+
+// ═══════════════════════════════════════════════════════
+// CHAPTER NAV
+// ═══════════════════════════════════════════════════════
+function buildChapterNav() {
+  appData = loadData();
+  const progress = activeUser ? (appData.users.find(u=>u.id===activeUser)?.progress || {}) : {};
+  const nav = document.getElementById('chapterNavItems');
+  nav.innerHTML = '';
+  CHAPTERS.forEach((ch, i) => {
+    const done = progress[ch.id]?.done;
+    const isActive = currentChapter === ch.id;
+    const div = document.createElement('div');
+    div.className = 'chapter-nav-item' + (isActive ? ' active' : '');
+    div.innerHTML = `
+      <div class="chapter-status ${done ? 'done' : (isActive ? 'active-ring' : '')}">${done ? '✓' : (i+1)}</div>
+      <div class="chapter-nav-title">${ch.title}</div>
+      <div class="chapter-check-count">${ch.questions.length}F</div>`;
+    div.onclick = () => openChapter(ch.id);
+    nav.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// HOME OVERVIEW
+// ═══════════════════════════════════════════════════════
+function buildHomeOverview() {
+  appData = loadData();
+  const progress = activeUser ? (appData.users.find(u=>u.id===activeUser)?.progress || {}) : {};
+  const cont = document.getElementById('moduleOverview');
+  cont.innerHTML = '';
+  CHAPTERS.forEach(ch => {
+    const done = progress[ch.id]?.done;
+    const score = progress[ch.id]?.score || 0;
+    const total = progress[ch.id]?.total || ch.questions.length;
+    const pct = done ? Math.round((score / total) * 100) : 0;
+    const card = document.createElement('div');
+    card.className = 'overview-card' + (done ? ' done' : '');
+    card.style.setProperty('--card-color', ch.color);
+    card.innerHTML = `
+      <div class="overview-icon">${ch.icon}</div>
+      <div class="overview-title">${ch.title}</div>
+      <div class="overview-meta">${ch.meta}${done ? ' · <span style="color:var(--accent-green)">✓ Abgeschlossen</span>' : ''}</div>
+      <div class="overview-progress-bar"><div class="overview-progress-fill" style="width:${pct}%"></div></div>`;
+    card.onclick = () => openChapter(ch.id);
+    cont.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// CHAPTER SCREENS
+// ═══════════════════════════════════════════════════════
+function buildChapterScreens() {
+  appData = loadData();
+  const progress = activeUser ? (appData.users.find(u=>u.id===activeUser)?.progress || {}) : {};
+  const cont = document.getElementById('chapterScreens');
+  cont.innerHTML = '';
+  checkAnswers = {};
+
+  CHAPTERS.forEach((ch, chIdx) => {
+    const done = progress[ch.id]?.done;
+    checkAnswers[ch.id] = {};
+    const nextCh = CHAPTERS[chIdx + 1];
+
+    let questionsHtml = '';
+    ch.questions.forEach((q, qi) => {
+      const opts = q.options.map((opt, oi) => `
+        <div class="check-option" id="opt_${ch.id}_${qi}_${oi}" onclick="selectCheckOption('${ch.id}',${qi},${oi})">
+          <div class="check-radio"><div class="check-radio-dot"></div></div>
+          <div>${opt}</div>
+        </div>`).join('');
+      questionsHtml += `
+        <div class="check-question">
+          <div class="check-q-text"><div class="check-q-num">${qi+1}</div><div>${q.q}</div></div>
+          <div class="check-options">${opts}</div>
+          <div class="check-feedback" id="fb_${ch.id}_${qi}"></div>
+        </div>`;
+    });
+
+    const screen = document.createElement('div');
+    screen.className = 'chapter-screen';
+    screen.id = 'chapter_' + ch.id;
+    screen.innerHTML = `
+      <div class="chapter-breadcrumb">
+        <span class="breadcrumb-link" onclick="showHome()">Übersicht</span>
+        <span>›</span>
+        <span>${ch.icon} ${ch.title}</span>
+      </div>
+      <div class="chapter-header">
+        <div class="chapter-tag">${ch.icon} Kapitel ${chIdx+1} von ${CHAPTERS.length}</div>
+        <h1 class="chapter-title">${ch.title}</h1>
+        <p class="chapter-intro">${ch.intro}</p>
+      </div>
+      ${ch.content}
+      <div class="check-section">
+        <div class="check-header">
+          <div class="check-title">🧠 Verständnisfragen <div class="check-badge">${ch.questions.length} Fragen</div></div>
+          ${done ? '<span style="font-size:12px;color:var(--accent-green)">✓ Bereits abgeschlossen</span>' : ''}
+        </div>
+        <div class="check-body">${questionsHtml}</div>
+        <div class="check-actions">
+          <div class="check-score-mini" id="checkScoreMini_${ch.id}">Beantworte alle Fragen, dann auswerten →</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-check" id="btnCheck_${ch.id}" onclick="submitCheck('${ch.id}')" disabled>Auswerten</button>
+            <button class="btn-next-chapter" id="btnNextChapter_${ch.id}"
+              onclick="${nextCh ? `openChapter('${nextCh.id}')` : 'showHome()'}">
+              ${nextCh ? `Weiter: ${nextCh.title} →` : '🏆 Zur Übersicht'}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="completion-banner" id="completionBanner_${ch.id}">
+        <div class="completion-icon">🎉</div>
+        <div class="completion-title">Kapitel abgeschlossen!</div>
+        <div class="completion-sub" id="completionSub_${ch.id}"></div>
+        ${nextCh
+          ? `<button class="btn-sm primary" onclick="openChapter('${nextCh.id}')">Weiter: ${nextCh.title} →</button>`
+          : `<button class="btn-sm primary" onclick="showHome()">Zur Übersicht 🏆</button>`}
+      </div>`;
+    cont.appendChild(screen);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showHome() {
+  currentChapter = null;
+  document.getElementById('screenHome').style.display = 'block';
+  document.querySelectorAll('.chapter-screen').forEach(s => s.classList.remove('active'));
+  buildChapterNav();
+  buildHomeOverview();
+  window.scrollTo(0, 0);
+}
+
+function openChapter(id) {
+  if (!activeUser) { openModal(); return; }
+  currentChapter = id;
+  document.getElementById('screenHome').style.display = 'none';
+  document.querySelectorAll('.chapter-screen').forEach(s => s.classList.remove('active'));
+  const screen = document.getElementById('chapter_' + id);
+  if (screen) screen.classList.add('active');
+  buildChapterNav();
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════
+// VERSTÄNDNISFRAGEN
+// ═══════════════════════════════════════════════════════
+function selectCheckOption(chapterId, qi, oi) {
+  const ch = CHAPTERS.find(c => c.id === chapterId);
+  if (!ch) return;
+  ch.questions[qi].options.forEach((_, idx) => {
+    const el = document.getElementById(`opt_${chapterId}_${qi}_${idx}`);
+    if (el && !el.classList.contains('correct') && !el.classList.contains('wrong'))
+      el.classList.remove('selected');
+  });
+  const chosen = document.getElementById(`opt_${chapterId}_${qi}_${oi}`);
+  if (chosen && !chosen.classList.contains('locked')) {
+    chosen.classList.add('selected');
+    checkAnswers[chapterId][qi] = oi;
+  }
+  const allAnswered = ch.questions.every((_, i) => checkAnswers[chapterId][i] !== undefined);
+  if (allAnswered) {
+    document.getElementById('btnCheck_' + chapterId).disabled = false;
+    document.getElementById('checkScoreMini_' + chapterId).innerHTML = '<strong style="color:var(--accent-gold)">Alle beantwortet – jetzt auswerten!</strong>';
+  }
+}
+
+function submitCheck(chapterId) {
+  const ch = CHAPTERS.find(c => c.id === chapterId);
+  if (!ch) return;
+  let score = 0;
+  ch.questions.forEach((q, qi) => {
+    const chosen = checkAnswers[chapterId][qi];
+    const isCorrect = chosen === q.correct;
+    if (isCorrect) score++;
+    q.options.forEach((_, oi) => {
+      const el = document.getElementById(`opt_${chapterId}_${qi}_${oi}`);
+      if (!el) return;
+      el.classList.remove('selected');
+      el.classList.add('locked');
+      if (oi === q.correct) el.classList.add('correct');
+      else if (oi === chosen && !isCorrect) el.classList.add('wrong');
+    });
+    const fb = document.getElementById(`fb_${chapterId}_${qi}`);
+    if (fb) {
+      fb.className = 'check-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.innerHTML = (isCorrect ? '✓ Richtig! ' : '✗ Falsch. ') + q.feedback;
+      fb.style.display = 'block';
+    }
+  });
+  const total = ch.questions.length;
+  const pct = Math.round((score / total) * 100);
+  document.getElementById('checkScoreMini_' + chapterId).innerHTML =
+    `Ergebnis: <strong>${score} / ${total} richtig (${pct}%)</strong>`;
+  document.getElementById('btnCheck_' + chapterId).disabled = true;
+  document.getElementById('btnCheck_' + chapterId).textContent = 'Ausgewertet';
+  const btnNext = document.getElementById('btnNextChapter_' + chapterId);
+  if (btnNext) btnNext.classList.add('show');
+  const banner = document.getElementById('completionBanner_' + chapterId);
+  const sub = document.getElementById('completionSub_' + chapterId);
+  if (banner && sub) {
+    sub.textContent = `${score} von ${total} Fragen richtig (${pct}%) — ${pct >= 67 ? 'Gut gemacht!' : 'Wiederhole das Kapitel nochmal.'}`;
+    banner.classList.add('show');
+  }
+  if (activeUser) {
+    setChapterDone(activeUser, chapterId, score, total);
+    appData = loadData();
+    updateSidebarUser();
+    buildChapterNav();
+    buildHomeOverview();
+  }
+  setTimeout(() => {
+    const fb0 = document.getElementById(`fb_${chapterId}_0`);
+    if (fb0) fb0.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+}
+
+init();
+</script>
+</body>
+</html>

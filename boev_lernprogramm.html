@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BÖV Lernprogramm – Lebensversicherung</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1828;
+    --surface2: #242237;
+    --accent: #e8c547;
+    --accent2: #ff6b6b;
+    --accent3: #6bcfff;
+    --text: #f0ede8;
+    --text-muted: #8b8797;
+    --correct: #4ade80;
+    --wrong: #f87171;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND NOISE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-badge {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .logo-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .score-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .score-item {
+    text-align: right;
+  }
+
+  .score-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .score-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* SCREEN TRANSITIONS */
+  .screen {
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* START SCREEN */
+  .start-hero {
+    text-align: center;
+    padding: 48px 0 32px;
+  }
+
+  .start-eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .start-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 6vw, 54px);
+    line-height: 1.1;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .start-title span {
+    color: var(--accent);
+    font-style: normal;
+  }
+
+  .start-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+
+  .module-card:hover {
+    border-color: rgba(232, 197, 71, 0.3);
+    transform: translateY(-2px);
+    background: var(--surface2);
+  }
+
+  .module-card:hover::before { transform: scaleX(1); }
+
+  .module-card.selected {
+    border-color: var(--accent);
+    background: rgba(232, 197, 71, 0.08);
+  }
+
+  .module-card.selected::before { transform: scaleX(1); }
+
+  .module-icon { font-size: 24px; margin-bottom: 10px; }
+
+  .module-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .module-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 16px 48px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:hover {
+    background: #f5d35a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(232, 197, 71, 0.3);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* QUIZ SCREEN */
+  .question-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .question-number {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .question-topic {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .question-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(20px, 3.5vw, 26px);
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .option-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: rgba(232, 197, 71, 0.4);
+    background: var(--surface2);
+    transform: translateX(4px);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(74, 222, 128, 0.1);
+    color: var(--correct);
+  }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(248, 113, 113, 0.1);
+    color: var(--wrong);
+  }
+
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transition: all 0.18s ease;
+  }
+
+  .option-btn.correct .option-letter {
+    border-color: var(--correct);
+    background: var(--correct);
+    color: var(--bg);
+  }
+
+  .option-btn.wrong .option-letter {
+    border-color: var(--wrong);
+    background: var(--wrong);
+    color: var(--bg);
+  }
+
+  .option-text { position: relative; z-index: 1; line-height: 1.4; }
+
+  /* FEEDBACK */
+  .feedback-box {
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.3s ease;
+    display: none;
+  }
+
+  .feedback-box.show { display: block; }
+
+  .feedback-box.correct-fb {
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+  }
+
+  .feedback-box.wrong-fb {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+  }
+
+  .feedback-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .feedback-box.correct-fb .feedback-label { color: var(--correct); }
+  .feedback-box.wrong-fb .feedback-label { color: var(--wrong); }
+
+  .feedback-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .feedback-text strong { color: var(--text); }
+
+  /* NEXT BUTTON */
+  .quiz-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-next {
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    padding: 12px 32px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-next.show {
+    display: flex;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .btn-next:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* STREAK BADGE */
+  .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232, 197, 71, 0.12);
+    border: 1px solid rgba(232, 197, 71, 0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .streak-badge.glow {
+    box-shadow: 0 0 16px rgba(232, 197, 71, 0.4);
+    animation: pulse 0.5s ease;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* RESULTS SCREEN */
+  .results-wrap {
+    text-align: center;
+    padding: 40px 0;
+  }
+
+  .results-badge {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes bounceIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .results-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+
+  .results-sub {
+    color: var(--text-muted);
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 16px;
+  }
+
+  .stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .btn-restart {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 16px 48px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 8px;
+  }
+
+  .btn-restart:hover {
+    background: #f5d35a;
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    padding: 15px 32px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 8px;
+  }
+
+  .btn-outline:hover {
+    border-color: rgba(255,255,255,0.3);
+    background: var(--surface);
+  }
+
+  /* TIER MESSAGE */
+  .tier-message {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .tier-message strong { color: var(--text); }
+
+  /* COMBO POPUP */
+  .combo-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 28px;
+    font-weight: 800;
+    padding: 16px 32px;
+    border-radius: 12px;
+    z-index: 100;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .combo-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 480px) {
+    .results-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-value { font-size: 26px; }
+    .score-display { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="combo-popup" id="comboPopup">🔥 Combo!</div>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-badge">BÖV</div>
+      <div class="logo-title">Lernprogramm</div>
+    </div>
+    <div class="score-display">
+      <div class="score-item">
+        <div class="score-label">Punkte</div>
+        <div class="score-value" id="scoreDisplay">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Streak</div>
+        <div class="score-value" id="streakDisplay">0🔥</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-meta">
+      <span id="progressText">Frage 1 von 10</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div class="screen active" id="screenStart">
+    <div class="start-hero">
+      <div class="start-eyebrow">BÖV Außendienst-Prüfungsvorbereitung</div>
+      <h1 class="start-title">Lern<span>spiel</span><br>Versicherung</h1>
+      <p class="start-sub">Teste dein Wissen aus den offiziellen BÖV-Skripten. Sammle Punkte, baue Streaks auf und meistere die Prüfung.</p>
+    </div>
+
+    <div class="module-grid">
+      <div class="module-card selected" data-module="mixed" onclick="selectModule(this)">
+        <div class="module-icon">⚡</div>
+        <div class="module-name">Gemischt</div>
+        <div class="module-count">Alle Themen · 15 Fragen</div>
+      </div>
+      <div class="module-card" data-module="lebensversicherung" onclick="selectModule(this)">
+        <div class="module-icon">🛡️</div>
+        <div class="module-name">Lebensversicherung</div>
+        <div class="module-count">Grundlagen & Formen</div>
+      </div>
+      <div class="module-card" data-module="zusatztarife" onclick="selectModule(this)">
+        <div class="module-icon">➕</div>
+        <div class="module-name">Zusatztarife</div>
+        <div class="module-count">BUZ, AUZ, EUZ & mehr</div>
+      </div>
+      <div class="module-card" data-module="vertrag" onclick="selectModule(this)">
+        <div class="module-icon">📋</div>
+        <div class="module-name">Vertragstechnik</div>
+        <div class="module-count">Bezugsrecht, Prämien</div>
+      </div>
+    </div>
+
+    <div style="text-align:center">
+      <button class="btn-primary" onclick="startQuiz()">Quiz starten →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen" id="screenQuiz">
+    <div class="streak-badge" id="streakBadge">⚡ Kein Streak – beantworte die erste Frage!</div>
+
+    <div class="question-header">
+      <div class="question-number" id="questionNum">01 / 10</div>
+      <div>
+        <div class="question-topic" id="questionTopic">Lebensversicherung</div>
+        <div class="question-text" id="questionText">Frage lädt...</div>
+      </div>
+    </div>
+
+    <div class="options-grid" id="optionsGrid"></div>
+
+    <div class="feedback-box" id="feedbackBox">
+      <div class="feedback-label" id="feedbackLabel"></div>
+      <div class="feedback-text" id="feedbackText"></div>
+    </div>
+
+    <div class="quiz-actions">
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screenResults">
+    <div class="results-wrap">
+      <div class="results-badge" id="resultsBadge">🏆</div>
+      <h2 class="results-title" id="resultsTitle">Ausgezeichnet!</h2>
+      <p class="results-sub" id="resultsSub">Du hast 12 von 15 Fragen richtig beantwortet.</p>
+
+      <div class="results-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="statScore">0</div>
+          <div class="stat-label">Punkte</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statCorrect">0</div>
+          <div class="stat-label">Richtig</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statStreak">0</div>
+          <div class="stat-label">Max Streak</div>
+        </div>
+      </div>
+
+      <div class="tier-message" id="tierMessage"></div>
+
+      <div>
+        <button class="btn-restart" onclick="restartQuiz()">Nochmal spielen</button>
+        <button class="btn-outline" onclick="goToStart()">Modul wechseln</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// QUESTION BANK — direkt aus BÖV Skriptum Lebensversicherung
+// ============================================================
+const ALL_QUESTIONS = [
+  // ---- LEBENSVERSICHERUNG GRUNDLAGEN ----
+  {
+    topic: "Lebensversicherung – Grundlagen",
+    module: "lebensversicherung",
+    q: "Welche Leistungsformen gibt es bei einer Lebensversicherung?",
+    options: [
+      "Nur einmalige Kapitalzahlung",
+      "Einmalige Kapitalzahlung oder laufende Rente",
+      "Nur laufende Rente",
+      "Kapitalzahlung, Rente oder Sachleistung"
+    ],
+    correct: 1,
+    explanation: "Die Leistung der Lebensversicherung erfolgt entweder als <strong>einmalige Kapitalzahlung</strong> oder als <strong>laufende Rente</strong>. Sachleistungen sind nicht vorgesehen."
+  },
+  {
+    topic: "Versicherungsformen",
+    module: "lebensversicherung",
+    q: "Was ist die Er- und Ablebensversicherung (gemischte Lebensversicherung)?",
+    options: [
+      "Sie leistet nur im Todesfall",
+      "Sie leistet bei Ableben oder spätestens zum Ende der Vertragslaufzeit",
+      "Sie leistet nur bei Erleben des Vertragsablaufs",
+      "Sie ist ausschließlich für betriebliche Zwecke geeignet"
+    ],
+    correct: 1,
+    explanation: "Die Er- und Ablebensversicherung leistet die Versicherungssumme plus Gewinnanteile <strong>bei Ableben</strong>, spätestens jedoch <strong>zum Ende der vereinbarten Versicherungsdauer</strong>. Sie dient sowohl der Hinterbliebenen- als auch der Altersvorsorge."
+  },
+  {
+    topic: "Versicherungsformen",
+    module: "lebensversicherung",
+    q: "Was unterscheidet die Termfix-Versicherung von der Er- und Ablebensversicherung?",
+    options: [
+      "Die Termfix zahlt nur bei Unfall",
+      "Die Termfix leistet immer zum vereinbarten Termin – unabhängig davon, ob die versicherte Person lebt",
+      "Die Termfix hat keine Prämienzahlungspflicht",
+      "Bei der Termfix ist eine abgekürzte Prämienzahlung möglich"
+    ],
+    correct: 1,
+    explanation: "Die Termfix-Versicherung leistet <strong>immer zum vereinbarten Termin</strong>, egal ob die versicherte Person diesen erlebt oder nicht. Sie eignet sich für Kindervorsorge, aber NICHT für Hinterbliebenenvorsorge, da bei Ableben die Leistung nicht sofort fällig wird."
+  },
+  {
+    topic: "Versicherungsformen",
+    module: "lebensversicherung",
+    q: "Welche Aussage zur Risikoversicherung ist korrekt?",
+    options: [
+      "Es findet Vermögensbildung statt",
+      "Die Versicherungssumme wird bei Erleben ausbezahlt",
+      "Es gibt keine Erlebensleistung – Zahlung nur bei Ableben während der Laufzeit",
+      "Die Risikoversicherung ist immer günstiger als die Er- und Ablebensversicherung"
+    ],
+    correct: 2,
+    explanation: "Bei der Risikoversicherung wird die Versicherungssumme <strong>nur bei Ableben</strong> der versicherten Person während der Laufzeit fällig. Es gibt <strong>keine Erlebensleistung</strong> und keine Vermögensbildung."
+  },
+  {
+    topic: "Drei-Säulen-Theorie",
+    module: "lebensversicherung",
+    q: "Was stellt die 2. Säule der Altersvorsorge dar?",
+    options: [
+      "Gesetzliche Sozialversicherung",
+      "Betriebliche Vorsorge über private Versicherer",
+      "Eigene private Vorsorge",
+      "Staatliche Zukunftsvorsorge"
+    ],
+    correct: 1,
+    explanation: "Die <strong>2. Säule</strong> ist die <strong>betriebliche Vorsorge</strong> (z.B. Direktversicherungen, betriebliche Pensionszusagen). Die 1. Säule ist die gesetzliche Sozialversicherung, die 3. Säule ist die eigene private Vorsorge."
+  },
+  // ---- ZUSATZTARIFE ----
+  {
+    topic: "Berufsunfähigkeit",
+    module: "zusatztarife",
+    q: "Ab wann gilt laut Definition Berufsunfähigkeit als eingetreten?",
+    options: [
+      "Sobald der Versicherte krank gemeldet ist",
+      "Wenn die Arbeitsfähigkeit dauerhaft auf weniger als die Hälfte gesunken ist und dieser Zustand bereits 6 bzw. 12 Monate ununterbrochen besteht",
+      "Nur bei einem Unfall im Beruf",
+      "Wenn der Arzt eine Berufsunfähigkeit bescheinigt"
+    ],
+    correct: 1,
+    explanation: "Berufsunfähigkeit liegt vor, wenn die Arbeitsfähigkeit <strong>auf weniger als die Hälfte</strong> gesunken ist. Als Berufsunfähigkeit gilt der Zustand, wenn er bereits <strong>6 bzw. 12 Monate ununterbrochen</strong> besteht."
+  },
+  {
+    topic: "Zusatztarife",
+    module: "zusatztarife",
+    q: "Was ist der Unterschied zwischen Berufsunfähigkeit (BU) und Erwerbsunfähigkeit (EU)?",
+    options: [
+      "Kein Unterschied – beide Begriffe sind gleichbedeutend",
+      "Bei EU muss der Versicherte jeden Beruf aufgegeben haben, bei BU nur den ausgeübten",
+      "BU gilt nur für Angestellte, EU nur für Selbstständige",
+      "EU zahlt mehr als BU"
+    ],
+    correct: 1,
+    explanation: "<strong>Berufsunfähigkeit</strong>: unfähig, dem zuletzt ausgeübten Beruf nachzugehen. <strong>Erwerbsunfähigkeit</strong>: unfähig, <em>irgendeine</em> Erwerbstätigkeit auszuüben. EU ist die strengere Voraussetzung."
+  },
+  {
+    topic: "Zusatztarife",
+    module: "zusatztarife",
+    q: "Welche Personen sind für die Dread Disease Zusatzversicherung grundsätzlich NICHT versicherbar?",
+    options: [
+      "Personen über 60 Jahre",
+      "Personen, die bereits eine schwere Krankheit haben oder nicht arbeitsfähig sind",
+      "Personen unter 18 Jahren",
+      "Pensionisten"
+    ],
+    correct: 1,
+    explanation: "Nicht versicherbar für Dread Disease sind Personen, die <strong>bereits eine schwere Krankheit haben</strong> oder <strong>nicht arbeitsfähig</strong> sind. Das Mindesteintrittsalter ist 15 Jahre, das Höchsteintrittsalter meist 60–65 Jahre."
+  },
+  {
+    topic: "Zusatztarife",
+    module: "zusatztarife",
+    q: "Was leistet die Unfalltod-Zusatzversicherung (UTZ)?",
+    options: [
+      "Sie ersetzt die Hauptversicherung im Todesfall",
+      "Bei Ableben durch Unfall wird zusätzlich zur Todesfallleistung der Hauptversicherung die UTZ-Summe fällig",
+      "Sie deckt alle Unfälle, auch im Ausland nicht ab",
+      "Sie zahlt nur bei Arbeitsunfällen"
+    ],
+    correct: 1,
+    explanation: "Die UTZ leistet <strong>zusätzlich</strong> zur Todesfallleistung der Hauptversicherung. Bei Unfalltod wird also sowohl die Hauptversicherungssumme als auch die UTZ-Versicherungssumme ausgezahlt."
+  },
+  // ---- VERTRAGSTECHNIK ----
+  {
+    topic: "Bezugsrecht",
+    module: "vertrag",
+    q: "Warum sollte im Erlebensfall aus steuerlichen Gründen immer der Versicherungsnehmer selbst als Bezugsberechtigter eingesetzt werden?",
+    options: [
+      "Weil sonst die Einkommensteuer höher ist",
+      "Weil jede Leistung, die nicht an den VN ausgezahlt wird, schenkungssteuer- oder erbschaftssteuerpflichtig ist",
+      "Weil sonst die KESt anfällt",
+      "Aus datenschutzrechtlichen Gründen"
+    ],
+    correct: 1,
+    explanation: "Jede Versicherungsleistung, die <strong>nicht an den Versicherungsnehmer</strong> ausgezahlt wird, ist entweder <strong>schenkungssteuerpflichtig</strong> (unter Lebenden) oder <strong>erbschaftssteuerpflichtig</strong>. Daher: Im Erlebensfall immer VN als Bezugsberechtigten einsetzen."
+  },
+  {
+    topic: "Vertragstechnik",
+    module: "vertrag",
+    q: "Wie lange ist der Antragsteller bei einer Lebensversicherung an seinen Antrag gebunden?",
+    options: [
+      "2 Wochen",
+      "1 Monat",
+      "6 Wochen",
+      "3 Monate"
+    ],
+    correct: 2,
+    explanation: "Der Antragsteller ist <strong>6 Wochen</strong> an seinen Antrag gebunden. Dies ist die sogenannte <em>Bindefrist</em>."
+  },
+  {
+    topic: "Prämien",
+    module: "vertrag",
+    q: "Aus welchen drei Bestandteilen setzt sich eine Lebensversicherungsprämie zusammen?",
+    options: [
+      "Risikoprämie, Kapitalprämie, Verwaltungskosten",
+      "Risikoprämie, Sparprämie, Verwaltungskosten",
+      "Grundprämie, Zusatzprämie, Steuer",
+      "Nettoproämie, Zuschlag, Gewinnanteil"
+    ],
+    correct: 1,
+    explanation: "Die Lebensversicherungsprämie besteht aus: <strong>Risikoprämie</strong> (für Todesfälle), <strong>Sparprämie</strong> (wird aufgezinst, ergibt Erlebensversicherungssumme) und <strong>Verwaltungskosten</strong> (Provisionen, Verwaltung, etc.)."
+  },
+  {
+    topic: "Vertragssperren",
+    module: "vertrag",
+    q: "Was ist der Unterschied zwischen Verpfändung und Vinkulierung?",
+    options: [
+      "Es gibt keinen Unterschied",
+      "Bei Verpfändung erhält der Gläubiger ein Pfandrecht an den Ansprüchen; bei Vinkulierung wird die Auszahlung gesperrt bis zur Einigung",
+      "Vinkulierung ist nur für Banken möglich",
+      "Verpfändung ist steuerschädlich, Vinkulierung nicht – das gilt für alle Versicherungsarten"
+    ],
+    correct: 1,
+    explanation: "<strong>Verpfändung</strong>: Dem Dritten wird ein Pfandrecht an den Versicherungsansprüchen eingeräumt. <strong>Vinkulierung</strong>: Die Auszahlung der Leistung wird gesperrt – erst nach Einigung zwischen Bezugsberechtigtem und Gläubiger erfolgt die Zahlung. Vinkulierungen sind nach EStG §18 nicht steuerschädlich."
+  },
+  // ---- GEMISCHT / BETRIEB / ABFERTIGUNG ----
+  {
+    topic: "Lebensversicherung im Betrieb",
+    module: "mixed",
+    q: "Was ist der wesentliche Unterschied zwischen Direktvertrag und Indirektvertrag?",
+    options: [
+      "Der Direktvertrag ist teurer",
+      "Beim Direktvertrag sind Mitarbeiter/Hinterbliebene direkt bezugsberechtigt; beim Indirektvertrag ist die Firma bezugsberechtigt",
+      "Der Indirektvertrag unterliegt dem BPG",
+      "Beim Direktvertrag zahlt der Mitarbeiter die Prämie selbst"
+    ],
+    correct: 1,
+    explanation: "Beim <strong>Direktvertrag</strong>: Mitarbeiter und deren Hinterbliebene sind direkt bezugsberechtigt. Beim <strong>Indirektvertrag</strong> (Rückdeckungsversicherung): Die Firma ist bezugsberechtigt und erfüllt damit ihre Versorgungsverpflichtungen gegenüber dem Mitarbeiter."
+  },
+  {
+    topic: "Abfertigung neu",
+    module: "mixed",
+    q: "Wie hoch ist der Arbeitgeberbeitrag bei der Abfertigung 'neu'?",
+    options: [
+      "2,5% der Bruttolohnsumme",
+      "1,53% der Bruttolohnsumme monatlich",
+      "3% pro Quartal",
+      "Abhängig vom Dienstalter"
+    ],
+    correct: 1,
+    explanation: "Alle Arbeitgeber müssen monatlich <strong>1,53%</strong> der tatsächlichen Bruttolohnsumme an die Mitarbeitervorsorgekasse abführen – ohne Höchstbeitragsgrundlage und ohne Geringfügigkeitsgrenze."
+  },
+  {
+    topic: "Versicherungsumfang",
+    module: "mixed",
+    q: "Was passiert beim Rückkauf einer Lebensversicherung?",
+    options: [
+      "Der Vertrag läuft weiter, nur die Prämien werden pausiert",
+      "Der Versicherungsnehmer erhält den Rückkaufswert und alle Ansprüche aus dem Vertrag erlöschen",
+      "Der Rückkaufswert entspricht der Summe der eingezahlten Prämien",
+      "Der Rückkauf ist erst nach 10 Jahren möglich"
+    ],
+    correct: 1,
+    explanation: "Der Rückkauf <strong>beendet das Vertragsverhältnis</strong>. Der VN erhält den Rückkaufswert (≠ Summe der eingezahlten Prämien). Mit der Auszahlung sind <strong>sämtliche Ansprüche erloschen</strong>. Der Rückkaufswert erreicht die Summe der eingezahlten Prämien erst nach ca. der halben Laufzeit."
+  },
+  {
+    topic: "Klauseln",
+    module: "mixed",
+    q: "Was bedeutet die Indexklausel bei einer Lebensversicherung?",
+    options: [
+      "Die Prämie wird jährlich um einen festen Prozentsatz erhöht",
+      "Der VN kann ohne neuerliche Gesundheitsprüfung Prämie oder Versicherungssumme erhöhen, wenn der Verbraucherpreisindex um den vereinbarten Prozentsatz gestiegen ist",
+      "Der Rechnungszinssatz wird an den Index angepasst",
+      "Die Versicherungssumme sinkt bei fallenden Preisen"
+    ],
+    correct: 1,
+    explanation: "Die <strong>Indexklausel</strong> gibt dem VN das Recht, <strong>ohne weitere Gesundheitsprüfung</strong> Prämie oder Versicherungssumme entsprechend dem gestiegenen Verbraucherpreisindex anzuheben. Im Gegensatz dazu erhöht die <em>Dynamikklausel</em> um einen festen Prozentsatz."
+  }
+];
+
+// MODULE FILTER
+const MODULE_QUESTIONS = {
+  mixed: ALL_QUESTIONS,
+  lebensversicherung: ALL_QUESTIONS.filter(q => q.module === 'lebensversicherung'),
+  zusatztarife: ALL_QUESTIONS.filter(q => q.module === 'zusatztarife'),
+  vertrag: ALL_QUESTIONS.filter(q => q.module === 'vertrag')
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  module: 'mixed',
+  questions: [],
+  current: 0,
+  score: 0,
+  streak: 0,
+  maxStreak: 0,
+  correct: 0,
+  answered: false
+};
+
+// ============================================================
+// UTILS
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============================================================
+// MODULE SELECT
+// ============================================================
+function selectModule(card) {
+  document.querySelectorAll('.module-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  state.module = card.dataset.module;
+}
+
+// ============================================================
+// START QUIZ
+// ============================================================
+function startQuiz() {
+  const pool = MODULE_QUESTIONS[state.module] || ALL_QUESTIONS;
+  const shuffled = shuffle(pool);
+  state.questions = shuffled.slice(0, Math.min(15, shuffled.length));
+  state.current = 0;
+  state.score = 0;
+  state.streak = 0;
+  state.maxStreak = 0;
+  state.correct = 0;
+  state.answered = false;
+
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('streakDisplay').textContent = '0🔥';
+  document.getElementById('progressWrap').style.display = 'block';
+
+  showScreen('screenQuiz');
+  renderQuestion();
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const q = state.questions[state.current];
+  const total = state.questions.length;
+
+  // Progress
+  const pct = Math.round((state.current / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `Frage ${state.current + 1} von ${total}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('questionNum').textContent = String(state.current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+
+  // Question
+  document.getElementById('questionTopic').textContent = q.topic;
+  document.getElementById('questionText').textContent = q.q;
+
+  // Options
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span class="option-text">${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, q);
+    grid.appendChild(btn);
+  });
+
+  // Reset feedback
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box';
+  document.getElementById('btnNext').className = 'btn-next';
+
+  // Streak badge
+  updateStreakBadge();
+  state.answered = false;
+}
+
+// ============================================================
+// ANSWER SELECTION
+// ============================================================
+function selectAnswer(chosen, q) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const buttons = document.querySelectorAll('.option-btn');
+  const isCorrect = chosen === q.correct;
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === chosen && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Score & streak
+  if (isCorrect) {
+    state.streak++;
+    state.correct++;
+    state.maxStreak = Math.max(state.maxStreak, state.streak);
+    const bonus = state.streak >= 3 ? 20 : 10;
+    state.score += bonus;
+    if (state.streak >= 3) showComboPopup(state.streak);
+  } else {
+    state.streak = 0;
+  }
+
+  document.getElementById('scoreDisplay').textContent = state.score;
+  document.getElementById('streakDisplay').textContent = state.streak + '🔥';
+  updateStreakBadge();
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  fb.classList.add('show');
+  fb.classList.add(isCorrect ? 'correct-fb' : 'wrong-fb');
+  document.getElementById('feedbackLabel').textContent = isCorrect ? '✓ Richtig!' : '✗ Leider falsch';
+  document.getElementById('feedbackText').innerHTML = q.explanation;
+
+  // Next button
+  document.getElementById('btnNext').classList.add('show');
+}
+
+// ============================================================
+// STREAK BADGE
+// ============================================================
+function updateStreakBadge() {
+  const badge = document.getElementById('streakBadge');
+  if (state.streak === 0) {
+    badge.textContent = '⚡ Kein Streak aktiv';
+    badge.classList.remove('glow');
+  } else if (state.streak === 1) {
+    badge.textContent = '⚡ 1 richtig – weiter so!';
+    badge.classList.remove('glow');
+  } else if (state.streak < 3) {
+    badge.textContent = `🔥 ${state.streak}er Streak!`;
+    badge.classList.remove('glow');
+  } else {
+    badge.textContent = `🔥🔥 ${state.streak}er Streak! +20 Punkte Bonus`;
+    badge.classList.add('glow');
+  }
+}
+
+// ============================================================
+// COMBO POPUP
+// ============================================================
+function showComboPopup(streak) {
+  const popup = document.getElementById('comboPopup');
+  popup.textContent = `🔥 ${streak}x Combo!`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1200);
+}
+
+// ============================================================
+// NEXT QUESTION
+// ============================================================
+function nextQuestion() {
+  state.current++;
+  if (state.current >= state.questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  document.getElementById('progressWrap').style.display = 'none';
+  showScreen('screenResults');
+
+  const total = state.questions.length;
+  const pct = Math.round((state.correct / total) * 100);
+
+  document.getElementById('statScore').textContent = state.score;
+  document.getElementById('statCorrect').textContent = `${state.correct}/${total}`;
+  document.getElementById('statStreak').textContent = state.maxStreak;
+  document.getElementById('resultsSub').textContent = `Du hast ${state.correct} von ${total} Fragen richtig beantwortet.`;
+
+  let badge, title, msg;
+  if (pct >= 90) {
+    badge = '🏆'; title = 'Ausgezeichnet!';
+    msg = '<strong>Prüfungsreif!</strong> Du beherrschst den Stoff auf höchstem Niveau. Wenn die echte BÖV-Prüfung aus 60 Single-Choice-Fragen besteht, bist du bestens vorbereitet.';
+  } else if (pct >= 70) {
+    badge = '🥇'; title = 'Sehr gut!';
+    msg = '<strong>Starke Leistung!</strong> Du hast die meisten Themen gut verstanden. Schau dir die falsch beantworteten Fragen nochmal an – ein weiterer Durchgang wird dir den letzten Schliff geben.';
+  } else if (pct >= 50) {
+    badge = '📚'; title = 'Gute Basis!';
+    msg = '<strong>Solide Grundlage.</strong> Du kennst die wichtigsten Konzepte, aber es gibt noch Lücken. Wiederhole besonders die Themen Zusatztarife und Vertragstechnik aus dem Skriptum.';
+  } else {
+    badge = '💪'; title = 'Weiter üben!';
+    msg = 'Du hast die Grundlagen, aber der Stoff braucht noch Vertiefung. <strong>Tipp:</strong> Lies das Skriptum Kapitel für Kapitel und teste dich danach gezielt mit den Modulquizzes.';
+  }
+
+  document.getElementById('resultsBadge').textContent = badge;
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('tierMessage').innerHTML = msg;
+}
+
+// ============================================================
+// RESTART / NAVIGATION
+// ============================================================
+function restartQuiz() {
+  startQuiz();
+}
+
+function goToStart() {
+  document.getElementById('progressWrap').style.display = 'none';
+  showScreen('screenStart');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BÖV Lerneinheiten – Lebensversicherung</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface2: #f0f2f5;
+  --surface3: #e4e7ec;
+  --accent: #1a6bcc;
+  --accent-gold: #b07d0a;
+  --accent-green: #1a7a34;
+  --accent-red: #c0392b;
+  --accent-purple: #6d3fbf;
+  --text: #1a1f2e;
+  --text-muted: #4a5568;
+  --text-dim: #9aa3b0;
+  --border: rgba(0,0,0,0.09);
+  --border-active: rgba(26,107,204,0.3);
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ────────────────────────────────────── */
+.app { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.brand-badge {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.brand-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* USER SWITCHER */
+.user-switcher {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.user-switcher:hover { border-color: var(--border-active); }
+
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-progress-text { font-size: 11px; color: var(--text-muted); }
+
+.user-chevron { color: var(--text-muted); font-size: 12px; }
+
+/* USER DROPDOWN */
+.user-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0; right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border-active);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.user-dropdown.open { display: block; }
+
+.dropdown-user-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+
+.dropdown-user-item:hover { background: var(--surface3); }
+.dropdown-user-item.active { background: rgba(26,107,204,0.08); }
+
+.dropdown-divider { height: 1px; background: var(--border); }
+
+.dropdown-action {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.dropdown-action:hover { background: var(--surface3); }
+
+/* ADD USER MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border-active);
+  border-radius: 12px;
+  padding: 28px;
+  width: 100%;
+  max-width: 360px;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.modal-input-wrap { margin-bottom: 16px; }
+.modal-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.modal-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-input:focus { border-color: var(--accent); }
+
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+.btn-sm {
+  padding: 9px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-sm.primary { background: var(--accent); color: #ffffff; }
+.btn-sm.primary:hover { opacity: 0.9; }
+.btn-sm.ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+.btn-sm.ghost:hover { border-color: rgba(0,0,0,0.2); color: var(--text); }
+
+/* CHAPTER NAV */
+.chapter-nav { padding: 16px 12px; flex: 1; }
+.chapter-nav-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.chapter-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.chapter-nav-item:hover { background: var(--surface2); }
+.chapter-nav-item.active { background: rgba(88,166,255,0.1); }
+.chapter-nav-item.active .chapter-nav-title { color: var(--accent); }
+
+.chapter-status {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.chapter-status.done {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #0d1117;
+}
+
+.chapter-status.active-ring { border-color: var(--accent); color: var(--accent); }
+
+.chapter-nav-title { font-size: 13px; font-weight: 600; color: var(--text-muted); flex: 1; line-height: 1.3; }
+.chapter-nav-item.active .chapter-nav-title { color: var(--text); }
+
+.chapter-check-count {
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--surface3);
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* SIDEBAR FOOTER */
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.quiz-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--accent-gold);
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.quiz-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.overall-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.overall-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.overall-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-green));
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.overall-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* ── MAIN CONTENT ───────────────────────────────── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 48px;
+  max-width: 900px;
+}
+
+/* HOME SCREEN */
+.home-hero { margin-bottom: 48px; }
+.home-eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.home-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.home-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+.module-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.overview-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.overview-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+
+.overview-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-color, var(--accent));
+  opacity: 0.6;
+}
+
+.overview-card.done::after { opacity: 1; }
+
+.overview-icon { font-size: 28px; margin-bottom: 12px; }
+.overview-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.overview-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+
+.overview-progress-bar {
+  height: 3px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.overview-progress-fill {
+  height: 100%;
+  background: var(--card-color, var(--accent));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* CHAPTER SCREEN */
+.chapter-screen { display: none; animation: fadeIn 0.35s ease; }
+.chapter-screen.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.chapter-breadcrumb {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breadcrumb-link {
+  cursor: pointer;
+  color: var(--accent);
+  transition: opacity 0.2s;
+}
+.breadcrumb-link:hover { opacity: 0.7; }
+
+.chapter-header {
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.chapter-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 1.2;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.chapter-intro {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 620px;
+}
+
+/* CONTENT BLOCKS */
+.content-block { margin-bottom: 32px; }
+
+.content-block h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content-block h3::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.content-block p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.content-block p strong { color: var(--text); }
+
+/* KEY CONCEPT BOXES */
+.key-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 16px 20px;
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.key-box.gold { border-left-color: var(--accent-gold); }
+.key-box.green { border-left-color: var(--accent-green); }
+.key-box.purple { border-left-color: var(--accent-purple); }
+.key-box.red { border-left-color: var(--accent-red); }
+
+.key-box-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+
+.key-box.gold .key-box-label { color: var(--accent-gold); }
+.key-box.green .key-box-label { color: var(--accent-green); }
+.key-box.purple .key-box-label { color: var(--accent-purple); }
+.key-box.red .key-box-label { color: var(--accent-red); }
+
+/* COMPARISON TABLE */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+}
+
+.compare-table th {
+  background: var(--surface2);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.compare-table td {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.compare-table tr:hover td { background: var(--surface2); color: var(--text); }
+
+/* PILL LIST */
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.pill {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 13px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* NUMBERED STEPS */
+.steps { margin: 16px 0; }
+.step-item {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+
+.step-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent);
+  border-color: rgba(88,166,255,0.3);
+}
+
+.step-content { font-size: 14px; line-height: 1.6; color: var(--text-muted); }
+.step-content strong { color: var(--text); }
+
+/* SECTION DIVIDER */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 32px 0;
+}
+
+/* ── VERSTÄNDNISFRAGEN ──────────────────────────── */
+.check-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 40px;
+}
+
+.check-header {
+  background: var(--surface2);
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.check-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.check-badge {
+  background: rgba(26,107,204,0.08);
+  color: var(--accent);
+  border: 1px solid rgba(26,107,204,0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+}
+
+.check-body { padding: 24px; }
+
+.check-question {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.check-question:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+.check-q-text {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+}
+
+.check-q-num {
+  width: 24px; height: 24px;
+  background: var(--surface2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.check-options { display: flex; flex-direction: column; gap: 8px; }
+
+.check-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.check-option:hover:not(.locked) {
+  border-color: rgba(26,107,204,0.35);
+  color: var(--text);
+  background: var(--surface3);
+}
+
+.check-option.selected { border-color: var(--accent); color: var(--text); background: rgba(26,107,204,0.06); }
+.check-option.correct { border-color: var(--accent-green); background: rgba(26,122,52,0.08); color: var(--accent-green); }
+.check-option.wrong { border-color: var(--accent-red); background: rgba(192,57,43,0.08); color: var(--accent-red); }
+.check-option.locked { cursor: default; }
+
+.check-radio {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+  transition: all 0.18s;
+}
+
+.check-option.selected .check-radio { border-color: var(--accent); background: var(--accent); }
+.check-option.correct .check-radio { border-color: var(--accent-green); background: var(--accent-green); }
+.check-option.wrong .check-radio { border-color: var(--accent-red); background: var(--accent-red); }
+
+.check-radio-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: white;
+  display: none;
+}
+
+.check-option.selected .check-radio-dot,
+.check-option.correct .check-radio-dot,
+.check-option.wrong .check-radio-dot { display: block; }
+
+.check-feedback {
+  margin-top: 10px;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 7px;
+  line-height: 1.6;
+  display: none;
+  animation: fadeIn 0.25s ease;
+}
+
+.check-feedback.correct-fb { background: rgba(26,122,52,0.07); border: 1px solid rgba(26,122,52,0.2); color: #1a6630; }
+.check-feedback.wrong-fb { background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.2); color: #9b2c20; }
+
+/* CHECK ACTIONS */
+.check-actions {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.check-score-mini {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.check-score-mini strong { color: var(--accent-gold); }
+
+.btn-check {
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  padding: 11px 28px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-check:hover { opacity: 0.88; }
+.btn-check:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-next-chapter {
+  background: var(--accent-green);
+  color: #ffffff;
+  border: none;
+  padding: 11px 28px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: none;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-next-chapter.show { display: flex; animation: fadeIn 0.3s ease; }
+.btn-next-chapter:hover { opacity: 0.88; transform: translateX(2px); }
+
+/* COMPLETION BANNER */
+.completion-banner {
+  background: linear-gradient(135deg, rgba(26,122,52,0.07), rgba(26,107,204,0.05));
+  border: 1px solid rgba(26,122,52,0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 32px;
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.completion-banner.show { display: block; }
+
+.completion-icon { font-size: 40px; margin-bottom: 12px; }
+.completion-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.completion-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { width: 240px; }
+  .main { padding: 24px 20px; }
+}
+
+@media (max-width: 600px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .chapter-nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Neuen Benutzer anlegen</div>
+    <div class="modal-input-wrap">
+      <div class="modal-label">Vorname</div>
+      <input class="modal-input" id="newUserInput" type="text" placeholder="z.B. Anna" maxlength="30"
+        onkeydown="if(event.key==='Enter') addUser()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm ghost" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-sm primary" onclick="addUser()">Anlegen</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-badge">BÖV</div>
+        <div class="brand-name">Lerneinheiten</div>
+      </div>
+
+      <!-- USER SWITCHER -->
+      <div class="user-switcher" onclick="toggleDropdown(event)" id="userSwitcherBtn">
+        <div class="user-avatar" id="sidebarAvatar" style="background:#1a3a5c; color:#58a6ff;">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Benutzer wählen</div>
+          <div class="user-progress-text" id="sidebarUserProgress">0 von 5 abgeschlossen</div>
+        </div>
+        <div class="user-chevron">▾</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div id="dropdownUserList"></div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-action" onclick="openModal()">＋ Neuen Benutzer anlegen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER NAV -->
+    <nav class="chapter-nav">
+      <div class="chapter-nav-label">Kapitel</div>
+      <div id="chapterNavItems"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="quiz-btn" onclick="openQuiz()">⚡ Zum Quiz →</button>
+      <div class="overall-progress">
+        <div class="overall-bar"><div class="overall-fill" id="overallFill" style="width:0%"></div></div>
+        <div class="overall-label" id="overallLabel">0%</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainContent">
+
+    <!-- HOME -->
+    <div id="screenHome">
+      <div class="home-hero">
+        <div class="home-eyebrow">BÖV Außendienst · Lernprogramm</div>
+        <h1 class="home-title">Lebensversicherung<br>Schritt für Schritt</h1>
+        <p class="home-sub">5 kompakte Lerneinheiten direkt aus den BÖV-Skripten. Jede Einheit schließt mit Verständnisfragen ab — dein Fortschritt wird pro Benutzer gespeichert.</p>
+      </div>
+
+      <div class="module-overview" id="moduleOverview"></div>
+
+      <div style="font-size:13px; color:var(--text-muted); margin-top:8px;">
+        👤 Wähle zuerst deinen Benutzer in der Seitenleiste, dann starte eine Einheit.
+      </div>
+    </div>
+
+    <!-- CHAPTER SCREENS (generated) -->
+    <div id="chapterScreens"></div>
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA — CHAPTERS
+// ══════════════════════════════════════════════════
+const CHAPTERS = [
+  {
+    id: 'grundlagen',
+    title: 'Grundlagen & Bedarf',
+    icon: '🛡️',
+    color: '#58a6ff',
+    meta: '5 Abschnitte · ~8 Min',
+    intro: 'Warum schließen Menschen eine Lebensversicherung ab? Was kann versichert werden, und wie wird die Leistung erbracht? Diese Einheit legt das Fundament für alle weiteren Kapitel.',
+    content: `
+      <div class="content-block">
+        <h3>Was ist eine Lebensversicherung?</h3>
+        <p>Der Abschluss einer Lebensversicherung ist das Resultat eines <strong>gekonnten Verkaufsgespräches</strong>. Da die Problemstellungen jeder Person unterschiedlich sind, gibt es verschiedene Lösungen und Varianten.</p>
+        <p>Prinzipiell können folgende Ereignisse im Leben einer Person versichert werden:</p>
+        <div class="pill-list">
+          <span class="pill">☠️ Tod</span>
+          <span class="pill">💒 Heirat</span>
+          <span class="pill">🏥 Schwere Krankheit (Dread Disease)</span>
+          <span class="pill">📅 Fester Termin (Termfix)</span>
+          <span class="pill">🦽 Berufsunfähigkeit</span>
+          <span class="pill">🤕 Unfalltod</span>
+          <span class="pill">🩹 Unfallinvalidität</span>
+          <span class="pill">🎂 Erleben des Vertragsablaufs</span>
+        </div>
+        <div class="key-box">
+          <div class="key-box-label">Leistungsformen</div>
+          Die Leistung erfolgt entweder als <strong>einmalige Kapitalzahlung</strong> oder als <strong>laufende Rente</strong>.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Bedarf — Warum schließen Kunden ab?</h3>
+        <p>Nach der Bedarfsermittlung stehen meist folgende Beweggründe im Vordergrund:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Hinterbliebenenvorsorge</strong> — Finanzielle Absicherung der Familie bei Ableben</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Altersvorsorge</strong> — Ergänzung zur gesetzlichen Pension</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Absicherung bei Berufsunfähigkeit</strong> oder schwerer Krankheit</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>Kreditbesicherung</strong> — Absicherung laufender Verbindlichkeiten</div></div>
+          <div class="step-item"><div class="step-num">5</div><div class="step-content"><strong>Vermögensbildung</strong> — Kapitalaufbau mit Versicherungsschutz</div></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Die Drei-Säulen-Theorie</h3>
+        <p>Die private Lebensversicherung ergänzt die gesetzliche Pensionsversicherung sinnvoll. Das System basiert auf drei Säulen:</p>
+        <table class="compare-table">
+          <thead><tr><th>Säule</th><th>Bezeichnung</th><th>Träger</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. Säule</strong></td><td>Gesetzliche Vorsorge</td><td>Sozialversicherung</td></tr>
+            <tr><td><strong>2. Säule</strong></td><td>Betriebliche Vorsorge</td><td>Privatversicherer / Pensionskasse</td></tr>
+            <tr><td><strong>3. Säule</strong></td><td>Eigene private Vorsorge</td><td>Privatversicherer</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box gold">
+          <div class="key-box-label">Merksatz</div>
+          Für Personen ohne gesetzliche Vorsorge (manche Freiberufler, Hausfrauen) ist die private Lebensversicherung die <strong>einzige Versorgungsmaßnahme</strong>.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Versicherungsschutz & Versicherungssumme</h3>
+        <p>Der Versicherer bietet Schutz nach dem beantragten und angenommenen Tarif — dokumentiert in der <strong>Polizze</strong>.</p>
+        <p>Die Versicherungssumme kann frei gewählt werden. Bei hohen Summen mit Ablebenskomponente muss der <strong>Bedarf nachgewiesen</strong> werden (z.B. bei Kreditbesicherung).</p>
+        <div class="key-box red">
+          <div class="key-box-label">Bereicherungsverbot</div>
+          Es soll immer nur ein den gegebenen Umständen <strong>notwendiger Schutz</strong> versichert werden. Eine Überversicherung ist nicht zulässig.
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Welche zwei Leistungsformen gibt es bei der Lebensversicherung?",
+        options: [
+          "Kapitalzahlung oder Sachleistung",
+          "Einmalige Kapitalzahlung oder laufende Rente",
+          "Monatliche Rente oder Jahresrente",
+          "Kapitalzahlung oder Naturalleistung"
+        ],
+        correct: 1,
+        feedback: "Die Leistung erfolgt entweder als <strong>einmalige Kapitalzahlung</strong> oder als <strong>laufende Rente</strong>. Sachleistungen sind in der Lebensversicherung nicht vorgesehen."
+      },
+      {
+        q: "Was repräsentiert die 2. Säule der österreichischen Altersvorsorge?",
+        options: [
+          "Die gesetzliche Sozialversicherung",
+          "Die private Eigenvorsorge über Privatversicherer",
+          "Die betriebliche Vorsorge über Privatversicherer oder Pensionskassen",
+          "Die staatliche Zukunftsvorsorge"
+        ],
+        correct: 2,
+        feedback: "Die <strong>2. Säule</strong> ist die <strong>betriebliche Vorsorge</strong> – organisiert über Privatversicherer oder Pensionskassen. Die 1. Säule ist die Sozialversicherung, die 3. ist die private Eigenvorsorge."
+      },
+      {
+        q: "Was besagt das Bereicherungsverbot bei der Versicherungssumme?",
+        options: [
+          "Der Versicherungsnehmer darf keinen Gewinn aus einer Versicherung erzielen",
+          "Es soll immer nur ein den Umständen entsprechend notwendiger Schutz versichert werden",
+          "Die Versicherungssumme darf EUR 500.000 nicht übersteigen",
+          "Bei Kreditbesicherung ist keine Lebensversicherung möglich"
+        ],
+        correct: 1,
+        feedback: "Das Bereicherungsverbot bedeutet: Es soll immer nur ein den <strong>gegebenen Umständen notwendiger Schutz</strong> versichert werden. Eine Überversicherung ist nicht erlaubt."
+      }
+    ]
+  },
+
+  {
+    id: 'versicherungsformen',
+    title: 'Versicherungsformen',
+    icon: '📊',
+    color: '#e3b341',
+    meta: '7 Formen · ~12 Min',
+    intro: 'Von der klassischen Er- und Ablebensversicherung bis zur fondsgebundenen Police — hier lernst du alle wichtigen Versicherungsformen und ihre jeweiligen Einsatzzwecke.',
+    content: `
+      <div class="content-block">
+        <h3>Überblick der Hauptformen</h3>
+        <p>Je nach Kundenbedarf kann die Lebensversicherung sehr unterschiedlich gestaltet werden. Die wichtigsten Hauptformen im Überblick:</p>
+        <table class="compare-table">
+          <thead><tr><th>Form</th><th>Leistet bei</th><th>Zweck</th></tr></thead>
+          <tbody>
+            <tr><td>Er- und Ablebensversicherung</td><td>Tod ODER Ablauf</td><td>Hinterbliebenen- + Altersvorsorge</td></tr>
+            <tr><td>Risikoversicherung</td><td>Nur Tod</td><td>Hinterbliebenenvorsorge, Kredit</td></tr>
+            <tr><td>Erlebensversicherung</td><td>Nur Ablauf</td><td>Kapitalaufbau, Altersvorsorge</td></tr>
+            <tr><td>Rentenversicherung</td><td>Ablauf als Rente</td><td>Private Zusatzrente</td></tr>
+            <tr><td>Termfix</td><td>Immer zu festem Termin</td><td>Kindervorsorge, Schulden</td></tr>
+            <tr><td>Aussteuerversicherung</td><td>Heirat d. Kindes od. 25. LJ</td><td>Vorsorge für Kindsheirat</td></tr>
+            <tr><td>Fondsgebundene LV</td><td>Ab- und Erleben</td><td>Kapitalmarkt-Beteiligung</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Er- und Ablebensversicherung (Gemischte LV)</h3>
+        <p>Die beliebteste Form. Sie leistet die Versicherungssumme + Gewinnanteile <strong>bei Ableben</strong> der versicherten Person, <strong>spätestens zum Vertragsablauf</strong>.</p>
+        <div class="key-box">
+          <div class="key-box-label">Wichtig: abgekürzte Prämienzahlung</div>
+          Wenn die Prämienzahlungsdauer <strong>kürzer als die Vertragslaufzeit</strong> ist, spricht man von abgekürzter Prämienzahlung.
+        </div>
+        <p>Für <strong>zwei oder mehr Personen</strong>: Versicherung auf verbundene Leben. Die Prämie ist günstiger als Einzelversicherungen. Bei gleichzeitigem Tod (z.B. Flugzeugabsturz) wird die Summe nur <strong>einmal</strong> ausbezahlt.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Risikoversicherung</h3>
+        <p>Leistet die Versicherungssumme <strong>ausschließlich bei Ableben</strong> während der Laufzeit — keine Erlebensleistung, <strong>keine Vermögensbildung</strong>.</p>
+        <p>Tarife: gleichbleibende oder <strong>fallende</strong> Versicherungssumme (z.B. für Kreditabsicherung). Auch für verbundene Leben verfügbar — Summe wird nur einmal ausbezahlt.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Termfix-Versicherung — Besonderheiten</h3>
+        <div class="key-box red">
+          <div class="key-box-label">Kernmerkmal</div>
+          Die Leistung erfolgt <strong>immer zum vereinbarten Termin</strong> — egal ob die versicherte Person diesen Termin erlebt oder nicht.
+        </div>
+        <p>Geeignet für: Kindervorsorge (Studiengeld, Heiratsausstattung), endfällige Finanzierungen.</p>
+        <p><strong>Nicht geeignet</strong> für Hinterbliebenenvorsorge — bei Ableben wird die Leistung nicht sofort fällig.</p>
+        <div class="key-box gold">
+          <div class="key-box-label">Einschränkungen</div>
+          Bei der Termfix-Versicherung ist eine <strong>abgekürzte Prämienzahlung sowie ein Einmalerlag nicht möglich</strong>.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Fondsgebundene Lebensversicherung</h3>
+        <p>Der Versicherungsnehmer bestimmt seine <strong>eigene Anlagestrategie</strong> durch Auswahl aus verschiedenen Wertpapierfonds. Ein Wechsel (Switch) zwischen Fonds ist während der Laufzeit möglich.</p>
+        <div class="key-box purple">
+          <div class="key-box-label">Besonderheit</div>
+          In der fondsgebundenen LV gibt es <strong>keine Gewinnbeteiligung</strong> und keinen Unterjährigkeitszuschlag. Der Wert der Fondsanteile = Wert der Versicherung.
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Was ist das Kernmerkmal der Termfix-Versicherung im Vergleich zur Er- und Ablebensversicherung?",
+        options: [
+          "Sie ist billiger als alle anderen Versicherungsformen",
+          "Die Leistung erfolgt immer zum vereinbarten Termin, unabhängig davon ob die versicherte Person lebt",
+          "Sie leistet nur bei Unfalltod",
+          "Die Prämien werden nur bis zum Tod der versicherten Person gezahlt"
+        ],
+        correct: 1,
+        feedback: "Die Termfix-Versicherung leistet <strong>immer zum vereinbarten Termin</strong> – egal ob die versicherte Person diesen Termin erlebt oder nicht. Das macht sie ideal für Kindervorsorge, aber ungeeignet für Hinterbliebenenvorsorge."
+      },
+      {
+        q: "Was gilt für die Risikoversicherung?",
+        options: [
+          "Sie leistet sowohl bei Ableben als auch bei Erleben",
+          "Es findet Vermögensbildung statt",
+          "Zahlung nur bei Ableben während der Laufzeit – keine Erlebensleistung",
+          "Sie ist ausschließlich für betriebliche Zwecke geeignet"
+        ],
+        correct: 2,
+        feedback: "Bei der Risikoversicherung wird die Summe <strong>nur bei Ableben</strong> fällig. Es gibt keine Erlebensleistung und <strong>keine Vermögensbildung</strong>. Sie dient der Hinterbliebenenvorsorge und Kreditabsicherung."
+      },
+      {
+        q: "Was ist bei der fondsgebundenen Lebensversicherung NICHT vorhanden?",
+        options: [
+          "Ablebensschutz",
+          "Wahlmöglichkeit zwischen verschiedenen Fonds",
+          "Gewinnbeteiligung und Unterjährigkeitszuschlag",
+          "Erlebensleistung"
+        ],
+        correct: 2,
+        feedback: "In der fondsgebundenen LV gibt es <strong>keine Gewinnbeteiligung</strong> und keinen <strong>Unterjährigkeitszuschlag</strong>. Der Wert der Fondsanteile stellt direkt den Wert der Versicherung dar."
+      }
+    ]
+  },
+
+  {
+    id: 'zusatztarife',
+    title: 'Zusatztarife & Klauseln',
+    icon: '➕',
+    color: '#bc8cff',
+    meta: '8 Zusatztarife · ~10 Min',
+    intro: 'BUZ, AUZ, EUZ, UTZ, UIZ, Dread Disease — die Zusatztarife erweitern den Schutz der Lebensversicherung gezielt. Dazu kommen wichtige Klauseln wie Index- und Dynamikklausel.',
+    content: `
+      <div class="content-block">
+        <h3>Übersicht Zusatztarife</h3>
+        <table class="compare-table">
+          <thead><tr><th>Kürzel</th><th>Name</th><th>Leistet bei</th></tr></thead>
+          <tbody>
+            <tr><td>BUZ</td><td>Berufsunfähigkeits-ZV</td><td>Berufsunfähigkeit</td></tr>
+            <tr><td>AUZ</td><td>Arbeitsunfähigkeits-ZV</td><td>Längerem Krankenstand</td></tr>
+            <tr><td>EUZ</td><td>Erwerbsunfähigkeits-ZV</td><td>Vollständige Erwerbsunfähigkeit</td></tr>
+            <tr><td>UTZ</td><td>Unfalltod-ZV</td><td>Tod durch Unfall</td></tr>
+            <tr><td>UIZ</td><td>Unfallinvaliditäts-ZV</td><td>Bleibende Invalidität durch Unfall</td></tr>
+            <tr><td>DD</td><td>Dread Disease</td><td>Diagnose schwere Krankheit</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Berufsunfähigkeits-ZV (BUZ) — Definition</h3>
+        <div class="key-box">
+          <div class="key-box-label">Definition Berufsunfähigkeit</div>
+          Berufsunfähigkeit liegt vor, wenn der Versicherte infolge Krankheit, Körperverletzung oder Kräfteverfall voraussichtlich <strong>dauernd</strong> außerstande ist, seinem <strong>ausgeübten und bekanntgegebenen Beruf</strong> nachzugehen — es sei denn, eine zumutbare andere Tätigkeit ist möglich.<br><br>
+          Berufsunfähigkeit gilt jedenfalls, wenn die Arbeitsfähigkeit <strong>auf weniger als die Hälfte</strong> gesunken ist und dieser Zustand bereits <strong>6 bzw. 12 Monate ununterbrochen</strong> besteht.
+        </div>
+        <p>Zwei Formen der BUZ: <strong>Prämienbefreiung BUZ</strong> (laufende Prämien werden übernommen) und <strong>Berufsunfähigkeits-Rente BUZR</strong> (zusätzlich Rente).</p>
+        <div class="key-box gold">
+          <div class="key-box-label">Nicht versicherbar bei BUZ</div>
+          Bestimmte <strong>Künstler, Berufssportler</strong> oder Personen mit außergewöhnlich hoher Gefährdung sind nicht versicherbar.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Unterschied: BU – AU – EU</h3>
+        <table class="compare-table">
+          <thead><tr><th></th><th>Berufsunfähigkeit (BU)</th><th>Arbeitsunfähigkeit (AU)</th><th>Erwerbsunfähigkeit (EU)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Voraussetzung</strong></td><td>Kann ausgeübten Beruf nicht mehr ausüben</td><td>Vollständig unfähig (= langer Krankenstand)</td><td>Kann <em>keinen</em> Beruf mehr ausüben</td></tr>
+            <tr><td><strong>Versicherbar ab</strong></td><td>Berufstätig + Ausbildung abgeschlossen</td><td>Voll berufstätig</td><td>Ab 15. Lebensjahr</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Dread Disease (schwere Krankheit)</h3>
+        <p>Die Leistung wird bereits bei <strong>Diagnose</strong> einer lebensbedrohenden Krankheit erbracht. Typischerweise versichert: Herzinfarkt, Krebs, Schlaganfall, Organtransplantationen, Erblindung, Lähmung, vollständige Erwerbsunfähigkeit.</p>
+        <div class="key-box red">
+          <div class="key-box-label">Nicht versicherbar</div>
+          Personen, die bereits eine <strong>schwere Krankheit haben</strong> oder <strong>nicht arbeitsfähig</strong> sind.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Wichtige Klauseln</h3>
+        <div class="steps">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content"><strong>Indexklausel (Wertsicherung):</strong> Prämie/Summe kann erhöht werden, wenn der Verbraucherpreisindex um den vereinbarten Prozentsatz gestiegen ist — <em>ohne erneute Gesundheitsprüfung</em>.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content"><strong>Dynamikklausel:</strong> Prämie/Summe erhöht sich jährlich um einen <em>festen Prozentsatz</em> — unabhängig vom Index.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content"><strong>Rentenoptionsklausel:</strong> Recht, bei Fälligkeit statt Kapitalzahlung eine Rente zu wählen (berechnet nach Rentenbarwerten zum Fälligkeitszeitpunkt).</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content"><strong>Erbschaftssteuerklausel:</strong> Bei Ableben wird die Versicherungsleistung direkt ans Finanzamt überwiesen — Erben müssen Erbschaftssteuer nicht selbst aufbringen.</div>
+          </div>
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Ab wann gilt laut BUZ-Definition Berufsunfähigkeit als dauerhaft eingetreten?",
+        options: [
+          "Sofort nach der Diagnose durch einen Arzt",
+          "Wenn die Arbeitsfähigkeit auf weniger als die Hälfte gesunken ist und dieser Zustand 6 bzw. 12 Monate ununterbrochen besteht",
+          "Nach 3 Jahren ununterbrochenen Krankenstands",
+          "Wenn der Sozialversicherungsträger einen BU-Bescheid ausstellt"
+        ],
+        correct: 1,
+        feedback: "Berufsunfähigkeit gilt als dauerhaft, wenn die Arbeitsfähigkeit auf <strong>weniger als die Hälfte</strong> gesunken ist und dieser Zustand bereits <strong>6 bzw. 12 Monate ununterbrochen</strong> besteht."
+      },
+      {
+        q: "Was ist der Hauptunterschied zwischen Indexklausel und Dynamikklausel?",
+        options: [
+          "Die Indexklausel ist günstiger",
+          "Bei der Indexklausel richtet sich die Erhöhung nach dem Verbraucherpreisindex; bei der Dynamikklausel nach einem festen Prozentsatz",
+          "Die Dynamikklausel erfordert eine Gesundheitsprüfung, die Indexklausel nicht",
+          "Beide sind identisch"
+        ],
+        correct: 1,
+        feedback: "<strong>Indexklausel:</strong> Erhöhung entsprechend dem gestiegenen Verbraucherpreisindex, ohne erneute Gesundheitsprüfung. <strong>Dynamikklausel:</strong> Jährliche Erhöhung um einen <em>festen Prozentsatz</em>, unabhängig vom Index."
+      },
+      {
+        q: "Was gilt für die Dread Disease Zusatzversicherung?",
+        options: [
+          "Sie leistet nur bei Tod durch die Erkrankung",
+          "Die Leistung wird bereits bei Diagnose der lebensbedrohenden Krankheit erbracht",
+          "Sie ist nur für Personen über 40 Jahre verfügbar",
+          "Sie ersetzt die Hauptlebensversicherung"
+        ],
+        correct: 1,
+        feedback: "Dread Disease leistet bereits bei der <strong>Diagnose</strong> der lebensbedrohenden Krankheit — nicht erst beim Tod. Versicherte Krankheiten sind u.a. Herzinfarkt, Krebs, Schlaganfall."
+      }
+    ]
+  },
+
+  {
+    id: 'vertrag',
+    title: 'Vertragstechnik & Prämien',
+    icon: '📋',
+    color: '#3fb950',
+    meta: '6 Abschnitte · ~10 Min',
+    intro: 'Wer sind Versicherungsnehmer, versicherte Person und Begünstigte? Wie werden Prämien berechnet? Was sind Vertragssperren? Diese Einheit erklärt die vertragliche Mechanik der Lebensversicherung.',
+    content: `
+      <div class="content-block">
+        <h3>Am Vertrag beteiligte Personen</h3>
+        <table class="compare-table">
+          <thead><tr><th>Person</th><th>Rolle</th><th>Wichtig</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Versicherungsnehmer (VN)</strong></td><td>Schließt den Vertrag ab, zahlt Prämie</td><td>Kann von der versicherten Person verschieden sein</td></tr>
+            <tr><td><strong>Versicherte Person (VP)</strong></td><td>Auf deren Leben der Vertrag läuft</td><td>Stellt das versicherte Risiko dar</td></tr>
+            <tr><td><strong>Begünstigte(r)</strong></td><td>Empfängt die Versicherungsleistung</td><td>Widerruflich oder unwiderruflich</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box gold">
+          <div class="key-box-label">Steuerliche Faustregel — Bezugsrecht</div>
+          Im <strong>Erlebensfall</strong> immer den <strong>Versicherungsnehmer selbst</strong> als Bezugsberechtigten einsetzen — sonst wird Schenkungssteuer fällig. Im <strong>Ablebensfall</strong> ein namentliches Bezugsrecht wählen.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Vertragstechnik — Wichtige Fristen & Pflichten</h3>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">⏱</div><div class="step-content"><strong>Bindefrist:</strong> Der Antragsteller ist <strong>6 Wochen</strong> an seinen Antrag gebunden.</div></div>
+          <div class="step-item"><div class="step-num">📝</div><div class="step-content"><strong>Unterschriften:</strong> Sind VN und VP nicht identisch, müssen beide den Antrag unterschreiben.</div></div>
+          <div class="step-item"><div class="step-num">🔍</div><div class="step-content"><strong>Legitimationspflicht:</strong> Der Versicherer muss gemäß Geldwäschegesetz die Identität des VN prüfen.</div></div>
+          <div class="step-item"><div class="step-num">⚠️</div><div class="step-content"><strong>Wahrheitspflicht:</strong> VN und VP müssen alle Fragen wahrheitsgemäß beantworten. Falsche Angaben berechtigen zum Rücktritt.</div></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Prämienbestandteile</h3>
+        <p>Eine Lebensversicherungsprämie setzt sich aus drei Komponenten zusammen:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Risikoprämie:</strong> Fließt in den "Risikotopf" — daraus werden Todesfälle (Schäden) bezahlt.</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Sparprämie:</strong> Wird mit dem Rechnungszins aufgezinst und ergibt über die Laufzeit die Erlebensversicherungssumme.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Verwaltungskosten:</strong> Für Provisionen, Polizzierung, Löhne, Werbungskosten etc.</div></div>
+        </div>
+        <div class="key-box">
+          <div class="key-box-label">Tarifgrundlagen</div>
+          Die Tarifprämie basiert auf: <strong>Sterbetafeln</strong>, <strong>Rechnungszinsfuß</strong> und <strong>Kosten</strong>. Je moderner die Sterbetafel, desto höher die Lebenserwartung → günstigere Risikoprämien, aber teurere Rentenversicherungen.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Vertragssperren: Zession, Verpfändung, Vinkulierung</h3>
+        <table class="compare-table">
+          <thead><tr><th>Sperre</th><th>Was passiert</th><th>Steuerfolge</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Abtretung/Zession</strong></td><td>Alle Rechte werden an Dritten übertragen</td><td>Gilt als VN-Wechsel → steuerrelevant bei EStG §18</td></tr>
+            <tr><td><strong>Verpfändung</strong></td><td>Pfandrecht an Versicherungsansprüchen</td><td>Bei Erlebensverträgen: mind. 10 Jahre Laufzeit nötig</td></tr>
+            <tr><td><strong>Vinkulierung</strong></td><td>Auszahlung gesperrt bis Einigung mit Gläubiger</td><td>Nicht steuerschädlich nach EStG §18</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Rückkauf & Prämienfreie Versicherung</h3>
+        <div class="key-box red">
+          <div class="key-box-label">Rückkauf</div>
+          Der VN bietet dem Versicherer die Polizze zum Kauf an. Der Rückkauf <strong>beendet das Vertragsverhältnis</strong>. Der Rückkaufswert ≠ Summe der eingezahlten Prämien (erreicht diese erst nach ca. der <strong>halben Laufzeit</strong>).
+        </div>
+        <div class="key-box green">
+          <div class="key-box-label">Prämienfreie Versicherung</div>
+          Auf Antrag kann die Prämienzahlungspflicht beendet werden — der Vertrag läuft weiter auf eine <strong>reduzierte prämienfreie Summe</strong>. Möglich frühestens nach Zahlung für 1/10 der Prämienzahlungsdauer oder 3 Jahre.
+        </div>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Warum sollte im Erlebensfall immer der Versicherungsnehmer selbst als Bezugsberechtigter eingesetzt werden?",
+        options: [
+          "Weil sonst die Einkommensteuer höher ausfällt",
+          "Weil jede Leistung, die nicht an den VN geht, schenkungssteuer- oder erbschaftssteuerpflichtig ist",
+          "Aus datenschutzrechtlichen Gründen",
+          "Weil sonst KESt anfällt"
+        ],
+        correct: 1,
+        feedback: "Jede Versicherungsleistung, die <strong>nicht an den Versicherungsnehmer</strong> ausgezahlt wird, ist entweder <strong>schenkungssteuerpflichtig</strong> (unter Lebenden) oder <strong>erbschaftssteuerpflichtig</strong>."
+      },
+      {
+        q: "Was unterscheidet Verpfändung und Vinkulierung steuerlich?",
+        options: [
+          "Beide sind steuerlich gleich zu behandeln",
+          "Verpfändung ist unter bestimmten Bedingungen steuerschädlich (EStG §18); Vinkulierung ist nicht steuerschädlich",
+          "Vinkulierung ist immer steuerschädlich",
+          "Beide sind nie steuerschädlich"
+        ],
+        correct: 1,
+        feedback: "<strong>Verpfändung</strong>: Bei Erlebens-, Renten- und Er- und Ablebensverträgen muss der Vertrag mindestens 10 Jahre gelaufen sein — sonst ist die Verpfändung steuerlich schädlich. <strong>Vinkulierung:</strong> Ist nach EStG §18 <em>nicht</em> steuerschädlich."
+      },
+      {
+        q: "Was passiert beim Rückkauf einer Lebensversicherung?",
+        options: [
+          "Der Vertrag läuft weiter, die Prämien sind nur pausiert",
+          "Der VN erhält den Rückkaufswert und alle Ansprüche erlöschen",
+          "Der Rückkaufswert entspricht der Summe der eingezahlten Prämien",
+          "Die versicherte Person verliert ihren Versicherungsschutz erst nach einem Jahr"
+        ],
+        correct: 1,
+        feedback: "Der Rückkauf <strong>beendet das Vertragsverhältnis vollständig</strong>. Mit der Auszahlung des Rückkaufswertes sind <strong>sämtliche Ansprüche erloschen</strong>. Der Rückkaufswert erreicht die Summe der eingezahlten Prämien erst nach ca. der halben Laufzeit."
+      }
+    ]
+  },
+
+  {
+    id: 'betrieb',
+    title: 'LV im Betrieb & Abfertigung',
+    icon: '🏢',
+    color: '#f85149',
+    meta: '4 Abschnitte · ~10 Min',
+    intro: 'Lebensversicherungen im betrieblichen Kontext: Direktvertrag vs. Indirektvertrag, steuerliche Behandlung, das Betriebspensionsgesetz und die Abfertigung "neu".',
+    content: `
+      <div class="content-block">
+        <h3>Direktvertrag vs. Indirektvertrag</h3>
+        <table class="compare-table">
+          <thead><tr><th></th><th>Direktvertrag</th><th>Indirektvertrag (Rückdeckung)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>VN ist</strong></td><td>Das Unternehmen</td><td>Das Unternehmen</td></tr>
+            <tr><td><strong>Bezugsberechtigt</strong></td><td>Mitarbeiter / Hinterbliebene direkt</td><td>Die Firma (Leistung dann an MA)</td></tr>
+            <tr><td><strong>Unterliegt</strong></td><td>BPG (Betriebspensionsgesetz)</td><td>Nicht dem BPG</td></tr>
+            <tr><td><strong>Bilanzierung</strong></td><td>Keine Aktivierung nötig</td><td>Muss aktiviert werden (Forderung)</td></tr>
+            <tr><td><strong>Unverfallbar</strong></td><td>Ja, von Beginn an</td><td>Nein</td></tr>
+          </tbody>
+        </table>
+        <div class="key-box">
+          <div class="key-box-label">Direktvertrag — Schutz durch BPG</div>
+          Durch das BPG sind Ansprüche aus Direktversicherungen von Beginn an <strong>unverfallbar</strong>. Eine Änderung des Bezugsrechts ohne Zustimmung des Mitarbeiters ist rechtsunwirksam. Auch im Insolvenzfall der Firma sind diese Verträge geschützt.
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Zukunftssicherung nach §3 Abs.1 Ziff.15 EStG 1988</h3>
+        <p>Unter folgenden Bedingungen sind Versicherungsprämien des Unternehmens <strong>für Mitarbeiter steuerfrei</strong>:</p>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">€</div><div class="step-content">Max. <strong>EUR 300,– pro Jahr und Mitarbeiter</strong></div></div>
+          <div class="step-item"><div class="step-num">👥</div><div class="step-content">Muss der <strong>Zukunftssicherung aller oder klar definierter Gruppen</strong> dienen (z.B. alle Angestellten, alle mit mind. 5 Jahren Zugehörigkeit)</div></div>
+          <div class="step-item"><div class="step-num">✓</div><td class="step-content">Für Unternehmen: <strong>Betriebsausgaben ohne Lohnnebenkosten</strong>. Für Mitarbeiter: <strong>keine Lohnsteuer, keine SV-Beiträge</strong></div></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Indirektvertrag — Drei Vorteile</h3>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>Risikoausgleich:</strong> Abpufferung unvorhergesehener Versorgungsfälle (Tod, Invalidität). Bei kleinen Belegschaften gelten Sterbetafeln nicht — die Versicherung übernimmt das Risiko.</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>Liquiditätsreserve:</strong> Pensionsrückstellungen liegen oft im Anlagevermögen und sind nicht sofort verfügbar — die Versicherung sichert die Liquidität.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>Bilanzoptik:</strong> Der aktivierte Wert der Rückdeckungsversicherung mindert die "Sozialverschuldung" sichtbar in der Bilanz.</div></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="content-block">
+        <h3>Abfertigung „neu"</h3>
+        <div class="key-box gold">
+          <div class="key-box-label">Beitrag</div>
+          Arbeitgeber führen monatlich <strong>1,53%</strong> der tatsächlichen Bruttolohnsumme an die Mitarbeitervorsorgekasse (MVK) ab — ohne Höchstbeitragsgrundlage, ohne Geringfügigkeitsgrenze.
+        </div>
+        <p>Auszahlungsvoraussetzungen (mindestens 3 Jahre im System UND eines der folgenden Ereignisse):</p>
+        <div class="pill-list">
+          <span class="pill">Kündigung durch Arbeitgeber</span>
+          <span class="pill">Einvernehmliche Auflösung</span>
+          <span class="pill">Ungerechtfertigte Entlassung</span>
+          <span class="pill">Berechtigter Austritt</span>
+          <span class="pill">Pensionsantritt</span>
+          <span class="pill">Tod</span>
+        </div>
+        <div class="key-box red">
+          <div class="key-box-label">Kein Auszahlungsanspruch bei</div>
+          Kündigung durch Arbeitnehmer, berechtigte Entlassung oder unberechtigter Austritt (Guthaben bleibt jedoch erhalten).
+        </div>
+        <p><strong>Steuerlich:</strong> Barauszahlung → 6% Einkommensteuer. Lebenslange Rente über Versicherung → <strong>steuerfrei</strong>.</p>
+      </div>
+    `,
+    questions: [
+      {
+        q: "Was ist der zentrale Unterschied zwischen Direkt- und Indirektvertrag hinsichtlich der Bezugsberechtigung?",
+        options: [
+          "Beim Direktvertrag ist die Firma bezugsberechtigt",
+          "Beim Direktvertrag sind Mitarbeiter/Hinterbliebene direkt bezugsberechtigt; beim Indirektvertrag die Firma",
+          "Beim Indirektvertrag sind die Mitarbeiter bezugsberechtigt",
+          "Es gibt keinen Unterschied"
+        ],
+        correct: 1,
+        feedback: "<strong>Direktvertrag:</strong> Mitarbeiter und deren Hinterbliebene sind <em>direkt</em> bezugsberechtigt. <strong>Indirektvertrag:</strong> Die Firma erhält die Leistung und erfüllt damit ihre Verpflichtungen gegenüber dem Mitarbeiter."
+      },
+      {
+        q: "Wie hoch ist der Arbeitgeberbeitrag zur Abfertigung 'neu'?",
+        options: [
+          "2,5% der Bruttolohnsumme jährlich",
+          "1,53% der Bruttolohnsumme monatlich",
+          "3% der Nettolohnsumme monatlich",
+          "Abhängig vom Dienstalter des Mitarbeiters"
+        ],
+        correct: 1,
+        feedback: "Alle Arbeitgeber zahlen monatlich <strong>1,53%</strong> der tatsächlichen Bruttolohnsumme an die Mitarbeitervorsorgekasse. Es gibt weder eine Höchstbeitragsgrundlage noch eine Geringfügigkeitsgrenze."
+      },
+      {
+        q: "Wann hat ein Arbeitnehmer im System Abfertigung 'neu' KEINEN Auszahlungsanspruch?",
+        options: [
+          "Bei Pensionsantritt",
+          "Bei Kündigung durch den Arbeitgeber nach 3 Jahren",
+          "Bei selbst gekündigtem Dienstverhältnis",
+          "Bei Tod des Arbeitnehmers"
+        ],
+        correct: 2,
+        feedback: "Bei <strong>Kündigung durch den Arbeitnehmer</strong> selbst besteht kein Auszahlungsanspruch — das Guthaben bleibt in der MVK erhalten, kann aber nicht entnommen werden. Anspruch besteht u.a. bei Kündigung durch den Arbeitgeber (nach 3 Jahren), Pensionsantritt oder Tod."
+      }
+    ]
+  }
+];
+
+// ══════════════════════════════════════════════════
+// PERSISTENCE
+// ══════════════════════════════════════════════════
+const STORAGE_KEY = 'boev_lerneinheiten_v2';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { users: [], activeUser: null };
+  } catch(e) {
+    return { users: [], activeUser: null };
+  }
+}
+
+function saveData(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function getUserProgress(userData, userId) {
+  const user = userData.users.find(u => u.id === userId);
+  return user ? user.progress : {};
+}
+
+function setChapterDone(userId, chapterId, score, total) {
+  const data = loadData();
+  const user = data.users.find(u => u.id === userId);
+  if (!user) return;
+  if (!user.progress) user.progress = {};
+  user.progress[chapterId] = { done: true, score, total, ts: Date.now() };
+  saveData(data);
+}
+
+// ══════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════
+let appData = loadData();
+let activeUser = appData.activeUser;
+let currentChapter = null;
+let checkAnswers = {};
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+function init() {
+  appData = loadData();
+  activeUser = appData.activeUser;
+  buildChapterNav();
+  buildChapterScreens();
+  buildHomeOverview();
+  updateSidebarUser();
+  buildUserDropdown();
+  showHome();
+}
+
+// ══════════════════════════════════════════════════
+// USER MANAGEMENT
+// ══════════════════════════════════════════════════
+const AVATAR_COLORS = [
+  ['#1a3a5c','#58a6ff'], ['#1a2e1a','#3fb950'], ['#2e1a2e','#bc8cff'],
+  ['#2e2a1a','#e3b341'], ['#2e1a1a','#f85149'], ['#1a2a2e','#79c0ff']
+];
+
+function getAvatarStyle(name) {
+  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[idx];
+}
+
+function buildUserDropdown() {
+  const list = document.getElementById('dropdownUserList');
+  list.innerHTML = '';
+  appData.users.forEach(u => {
+    const [bg, color] = getAvatarStyle(u.name);
+    const done = Object.values(u.progress || {}).filter(p => p.done).length;
+    const div = document.createElement('div');
+    div.className = 'dropdown-user-item' + (activeUser === u.id ? ' active' : '');
+    div.innerHTML = `
+      <div class="user-avatar" style="background:${bg};color:${color};font-size:13px;">${u.name.charAt(0).toUpperCase()}</div>
+      <div><div style="font-weight:700;font-size:13px;">${u.name}</div>
+      <div style="font-size:11px;color:var(--text-muted)">${done} / ${CHAPTERS.length} Kapitel</div></div>`;
+    div.onclick = (e) => { e.stopPropagation(); selectUser(u.id); };
+    list.appendChild(div);
+  });
+}
+
+function selectUser(id) {
+  appData = loadData();
+  appData.activeUser = id;
+  activeUser = id;
+  saveData(appData);
+  document.getElementById('userDropdown').classList.remove('open');
+  updateSidebarUser();
+  buildUserDropdown();
+  buildChapterNav();
+  buildHomeOverview();
+  buildChapterScreens();
+  showHome();
+}
+
+function updateSidebarUser() {
+  appData = loadData();
+  const user = appData.users.find(u => u.id === activeUser);
+  if (!user) {
+    document.getElementById('sidebarAvatar').textContent = '?';
+    document.getElementById('sidebarAvatar').style.background = '#1a1828';
+    document.getElementById('sidebarAvatar').style.color = '#58a6ff';
+    document.getElementById('sidebarUserName').textContent = 'Benutzer wählen';
+    document.getElementById('sidebarUserProgress').textContent = '0 von ' + CHAPTERS.length + ' abgeschlossen';
+    document.getElementById('overallFill').style.width = '0%';
+    document.getElementById('overallLabel').textContent = '0%';
+    return;
+  }
+  const [bg, color] = getAvatarStyle(user.name);
+  document.getElementById('sidebarAvatar').style.background = bg;
+  document.getElementById('sidebarAvatar').style.color = color;
+  document.getElementById('sidebarAvatar').textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('sidebarUserName').textContent = user.name;
+  const done = Object.values(user.progress || {}).filter(p => p.done).length;
+  document.getElementById('sidebarUserProgress').textContent = done + ' von ' + CHAPTERS.length + ' abgeschlossen';
+  const pct = Math.round((done / CHAPTERS.length) * 100);
+  document.getElementById('overallFill').style.width = pct + '%';
+  document.getElementById('overallLabel').textContent = pct + '%';
+}
+
+function toggleDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('userDropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('userDropdown').classList.remove('open');
+});
+
+function openModal() {
+  document.getElementById('userDropdown').classList.remove('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('newUserInput').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('newUserInput').value = '';
+}
+
+function addUser() {
+  const name = document.getElementById('newUserInput').value.trim();
+  if (!name) return;
+  appData = loadData();
+  const id = 'u_' + Date.now();
+  appData.users.push({ id, name, progress: {} });
+  appData.activeUser = id;
+  activeUser = id;
+  saveData(appData);
+  closeModal();
+  updateSidebarUser();
+  buildUserDropdown();
+  buildChapterNav();
+  buildHomeOverview();
+  buildChapterScreens();
+  showHome();
+}
+
+// ══════════════════════════════════════════════════
+// CHAPTER NAV
+// ══════════════════════════════════════════════════
+function buildChapterNav() {
+  appData = loadData();
+  const progress = activeUser ? getUserProgress(appData, activeUser) : {};
+  const nav = document.getElementById('chapterNavItems');
+  nav.innerHTML = '';
+  CHAPTERS.forEach((ch, i) => {
+    const done = progress[ch.id]?.done;
+    const isActive = currentChapter === ch.id;
+    const div = document.createElement('div');
+    div.className = 'chapter-nav-item' + (isActive ? ' active' : '');
+    div.id = 'nav_' + ch.id;
+    div.innerHTML = `
+      <div class="chapter-status ${done ? 'done' : (isActive ? 'active-ring' : '')}">${done ? '✓' : (i+1)}</div>
+      <div class="chapter-nav-title">${ch.title}</div>
+      <div class="chapter-check-count">${ch.questions.length}F</div>`;
+    div.onclick = () => openChapter(ch.id);
+    nav.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// HOME OVERVIEW
+// ══════════════════════════════════════════════════
+function buildHomeOverview() {
+  appData = loadData();
+  const progress = activeUser ? getUserProgress(appData, activeUser) : {};
+  const cont = document.getElementById('moduleOverview');
+  cont.innerHTML = '';
+  CHAPTERS.forEach(ch => {
+    const done = progress[ch.id]?.done;
+    const score = progress[ch.id]?.score || 0;
+    const total = progress[ch.id]?.total || ch.questions.length;
+    const pct = done ? Math.round((score / total) * 100) : 0;
+    const card = document.createElement('div');
+    card.className = 'overview-card' + (done ? ' done' : '');
+    card.style.setProperty('--card-color', ch.color);
+    card.innerHTML = `
+      <div class="overview-icon">${ch.icon}</div>
+      <div class="overview-title">${ch.title}</div>
+      <div class="overview-meta">${ch.meta}${done ? ' · <span style="color:var(--accent-green)">Abgeschlossen ✓</span>' : ''}</div>
+      <div class="overview-progress-bar"><div class="overview-progress-fill" style="width:${pct}%"></div></div>`;
+    card.onclick = () => openChapter(ch.id);
+    cont.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// CHAPTER SCREENS
+// ══════════════════════════════════════════════════
+function buildChapterScreens() {
+  appData = loadData();
+  const progress = activeUser ? getUserProgress(appData, activeUser) : {};
+  const cont = document.getElementById('chapterScreens');
+  cont.innerHTML = '';
+  CHAPTERS.forEach((ch, chIdx) => {
+    const done = progress[ch.id]?.done;
+    const screen = document.createElement('div');
+    screen.className = 'chapter-screen';
+    screen.id = 'chapter_' + ch.id;
+
+    // Build check questions HTML
+    let questionsHtml = '';
+    ch.questions.forEach((q, qi) => {
+      const opts = q.options.map((opt, oi) => `
+        <div class="check-option" id="opt_${ch.id}_${qi}_${oi}" onclick="selectCheckOption('${ch.id}',${qi},${oi})">
+          <div class="check-radio"><div class="check-radio-dot"></div></div>
+          <div>${opt}</div>
+        </div>`).join('');
+      questionsHtml += `
+        <div class="check-question" id="checkq_${ch.id}_${qi}">
+          <div class="check-q-text"><div class="check-q-num">${qi+1}</div><div>${q.q}</div></div>
+          <div class="check-options">${opts}</div>
+          <div class="check-feedback" id="fb_${ch.id}_${qi}"></div>
+        </div>`;
+    });
+
+    const nextChapter = CHAPTERS[chIdx + 1];
+
+    screen.innerHTML = `
+      <div class="chapter-breadcrumb">
+        <span class="breadcrumb-link" onclick="showHome()">Übersicht</span>
+        <span>›</span>
+        <span>${ch.icon} ${ch.title}</span>
+      </div>
+      <div class="chapter-header">
+        <div class="chapter-tag">${ch.icon} Kapitel ${chIdx + 1} von ${CHAPTERS.length}</div>
+        <h1 class="chapter-title">${ch.title}</h1>
+        <p class="chapter-intro">${ch.intro}</p>
+      </div>
+      ${ch.content}
+      <div class="check-section" id="checkSection_${ch.id}">
+        <div class="check-header">
+          <div class="check-title">🧠 Verständnisfragen <div class="check-badge">${ch.questions.length} Fragen</div></div>
+          ${done ? `<span style="font-size:12px;color:var(--accent-green)">✓ Bereits abgeschlossen</span>` : ''}
+        </div>
+        <div class="check-body">${questionsHtml}</div>
+        <div class="check-actions">
+          <div class="check-score-mini" id="checkScoreMini_${ch.id}">Beantworte alle Fragen, dann auswerten →</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button class="btn-check" id="btnCheck_${ch.id}" onclick="submitCheck('${ch.id}')" disabled>Auswerten</button>
+            <button class="btn-next-chapter ${nextChapter ? '' : ''}" id="btnNextChapter_${ch.id}"
+              onclick="${nextChapter ? `openChapter('${nextChapter.id}')` : 'showHome()'}">
+              ${nextChapter ? `Nächstes Kapitel: ${nextChapter.title} →` : '🏆 Zur Übersicht'}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="completion-banner" id="completionBanner_${ch.id}">
+        <div class="completion-icon">🎉</div>
+        <div class="completion-title">Kapitel abgeschlossen!</div>
+        <div class="completion-sub" id="completionSub_${ch.id}"></div>
+        ${nextChapter
+          ? `<button class="btn-sm primary" onclick="openChapter('${nextChapter.id}')">Weiter zu: ${nextChapter.title} →</button>`
+          : `<button class="btn-sm primary" onclick="showHome()">Zurück zur Übersicht 🏆</button>`}
+      </div>`;
+    cont.appendChild(screen);
+  });
+
+  // init checkAnswers state
+  checkAnswers = {};
+  CHAPTERS.forEach(ch => { checkAnswers[ch.id] = {}; });
+}
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function showHome() {
+  currentChapter = null;
+  document.getElementById('screenHome').style.display = 'block';
+  document.querySelectorAll('.chapter-screen').forEach(s => s.classList.remove('active'));
+  buildChapterNav();
+  buildHomeOverview();
+  document.getElementById('mainContent').scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+function openChapter(id) {
+  if (!activeUser) {
+    openModal();
+    return;
+  }
+  currentChapter = id;
+  document.getElementById('screenHome').style.display = 'none';
+  document.querySelectorAll('.chapter-screen').forEach(s => s.classList.remove('active'));
+  const screen = document.getElementById('chapter_' + id);
+  if (screen) screen.classList.add('active');
+  buildChapterNav();
+  document.getElementById('mainContent').scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+function openQuiz() {
+  // Try to open quiz file in same tab
+  window.location.href = 'boev_lernprogramm.html';
+}
+
+// ══════════════════════════════════════════════════
+// CHECK QUESTIONS
+// ══════════════════════════════════════════════════
+function selectCheckOption(chapterId, qi, oi) {
+  const ch = CHAPTERS.find(c => c.id === chapterId);
+  if (!ch) return;
+
+  // Check if already submitted
+  const btnCheck = document.getElementById('btnCheck_' + chapterId);
+  if (btnCheck.disabled === false && btnCheck.textContent === 'Ausgewertet') return;
+
+  // Deselect others in same question
+  ch.questions[qi].options.forEach((_, idx) => {
+    const el = document.getElementById(`opt_${chapterId}_${qi}_${idx}`);
+    if (el && !el.classList.contains('correct') && !el.classList.contains('wrong')) {
+      el.classList.remove('selected');
+    }
+  });
+
+  const chosen = document.getElementById(`opt_${chapterId}_${qi}_${oi}`);
+  if (chosen && !chosen.classList.contains('locked')) {
+    chosen.classList.add('selected');
+    checkAnswers[chapterId][qi] = oi;
+  }
+
+  // Enable submit if all answered
+  const allAnswered = ch.questions.every((_, i) => checkAnswers[chapterId][i] !== undefined);
+  if (allAnswered) {
+    document.getElementById('btnCheck_' + chapterId).disabled = false;
+    document.getElementById('checkScoreMini_' + chapterId).innerHTML = '<strong style="color:var(--accent-gold)">Alle Fragen beantwortet – jetzt auswerten!</strong>';
+  }
+}
+
+function submitCheck(chapterId) {
+  const ch = CHAPTERS.find(c => c.id === chapterId);
+  if (!ch) return;
+
+  let score = 0;
+  ch.questions.forEach((q, qi) => {
+    const chosen = checkAnswers[chapterId][qi];
+    const isCorrect = chosen === q.correct;
+    if (isCorrect) score++;
+
+    // Lock and color options
+    q.options.forEach((_, oi) => {
+      const el = document.getElementById(`opt_${chapterId}_${qi}_${oi}`);
+      if (!el) return;
+      el.classList.remove('selected');
+      el.classList.add('locked');
+      if (oi === q.correct) el.classList.add('correct');
+      else if (oi === chosen && !isCorrect) el.classList.add('wrong');
+    });
+
+    // Show feedback
+    const fb = document.getElementById(`fb_${chapterId}_${qi}`);
+    if (fb) {
+      fb.className = 'check-feedback ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+      fb.innerHTML = (isCorrect ? '✓ Richtig! ' : '✗ Falsch. ') + q.feedback;
+      fb.style.display = 'block';
+    }
+  });
+
+  // Update UI
+  const total = ch.questions.length;
+  const pct = Math.round((score / total) * 100);
+  document.getElementById('checkScoreMini_' + chapterId).innerHTML =
+    `Ergebnis: <strong>${score} / ${total} richtig (${pct}%)</strong>`;
+  document.getElementById('btnCheck_' + chapterId).disabled = true;
+  document.getElementById('btnCheck_' + chapterId).textContent = 'Ausgewertet';
+
+  // Show next button
+  const btnNext = document.getElementById('btnNextChapter_' + chapterId);
+  if (btnNext) btnNext.classList.add('show');
+
+  // Completion banner
+  const banner = document.getElementById('completionBanner_' + chapterId);
+  const sub = document.getElementById('completionSub_' + chapterId);
+  if (banner && sub) {
+    sub.textContent = `${score} von ${total} Fragen richtig (${pct}%) — ${pct >= 67 ? 'Gut gemacht!' : 'Wiederhole das Kapitel für mehr Sicherheit.'}`;
+    banner.classList.add('show');
+  }
+
+  // Save progress
+  if (activeUser) {
+    setChapterDone(activeUser, chapterId, score, total);
+    appData = loadData();
+    updateSidebarUser();
+    buildChapterNav();
+    buildHomeOverview();
+  }
+
+  // Scroll to feedback
+  setTimeout(() => {
+    const firstFb = document.getElementById(`fb_${chapterId}_0`);
+    if (firstFb) firstFb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+}
+
+// ══════════════════════════════════════════════════
+// START
+// ══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
