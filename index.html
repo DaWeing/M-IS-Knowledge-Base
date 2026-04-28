@@ -899,32 +899,84 @@ const CHAPTERS = [
 ];
 
 // ═══════════════════════════════════════════════════════
-// PERSISTENZ
+// SUPABASE CONFIG
 // ═══════════════════════════════════════════════════════
-const STORAGE_KEY = 'boev_wb1_v1';
+const SUPABASE_URL = 'https://ezsiadgyhvybdjwefonm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6c2lhZGd5aHZ5YmRqd2Vmb25tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjIyNzksImV4cCI6MjA5MjkzODI3OX0.dNecTR8QN7yM-ZIDjthW31TwUu0Wu0XweBwAkIYGzjU';
+const MODULE = 'wb1';
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { users: [], activeUser: null }; }
+async function sbFetch(path, options = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || ''
+    },
+    ...options
+  });
+  if (!res.ok) return null;
+  try { return await res.json(); } catch(e) { return null; }
+}
+
+// LOCAL CACHE (für schnelle UI-Updates)
+const LOCAL_KEY = 'boev_wb1_local';
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || { users: [], activeUser: null }; }
   catch(e) { return { users: [], activeUser: null }; }
 }
-
-function saveData(data) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+function saveLocal(data) {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch(e) {}
 }
 
-function setChapterDone(userId, chapterId, score, total) {
-  const data = loadData();
+// LOAD: Benutzer + Fortschritt aus Supabase
+async function loadData() {
+  const local = loadLocal();
+  // Fortschritt aus Supabase nachladen wenn Benutzer aktiv
+  if (local.activeUser) {
+    const userName = local.users.find(u => u.id === local.activeUser)?.name;
+    if (userName) {
+      const rows = await sbFetch(`progress?select=*&user_name=eq.${encodeURIComponent(userName)}&chapter_id=like.${MODULE}_%`);
+      if (rows && rows.length > 0) {
+        const user = local.users.find(u => u.id === local.activeUser);
+        if (user) {
+          user.progress = user.progress || {};
+          rows.forEach(r => {
+            user.progress[r.chapter_id.replace(MODULE + '_', '')] = { done: true, score: r.score, total: r.total };
+          });
+          saveLocal(local);
+        }
+      }
+    }
+  }
+  return local;
+}
+
+function saveData(data) { saveLocal(data); }
+
+async function setChapterDone(userId, chapterId, score, total) {
+  const data = loadLocal();
   const user = data.users.find(u => u.id === userId);
   if (!user) return;
   if (!user.progress) user.progress = {};
-  user.progress[chapterId] = { done: true, score, total, ts: Date.now() };
-  saveData(data);
+  user.progress[chapterId] = { done: true, score, total };
+  saveLocal(data);
+  // Supabase upsert
+  await sbFetch('progress', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates',
+    body: JSON.stringify({
+      user_name: user.name,
+      chapter_id: MODULE + '_' + chapterId,
+      score, total
+    })
+  });
 }
 
 // ═══════════════════════════════════════════════════════
 // APP STATE
 // ═══════════════════════════════════════════════════════
-let appData = loadData();
+let appData = loadLocal();
 let activeUser = appData.activeUser;
 let currentChapter = null;
 let checkAnswers = {};
@@ -942,8 +994,8 @@ function getAvatarStyle(name) {
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
-function init() {
-  appData = loadData();
+async function init() {
+  appData = await loadData();
   activeUser = appData.activeUser;
   buildChapterNav();
   buildChapterScreens();
