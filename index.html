@@ -925,7 +925,7 @@ const CHAPTERS = [
 // SUPABASE CONFIG
 // ═══════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://ezsiadgyhvybdjwefonm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6c2lhZGd5aHZ5YmRqd2Vmb25tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjIyNzksImV4cCI6MjA5MjkzODI3OX0.dNecTR8QN7yM-ZIDjthW31TwUu0Wu0XweBwAkIYGzjU';
+const SUPABASE_KEY = 'sb_publishable_KHcsT-ovlJ8gFjUtceU6NQ_tMZywXgJ';
 const MODULE = 'wb1';
 const SESSION_KEY = 'boev_session';
 
@@ -1109,17 +1109,33 @@ async function loginUser() {
   if (!email) return;
   const errEl = document.getElementById('loginError');
   errEl.style.display = 'none';
-  const rows = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=*`);
-  if (!rows || rows.length === 0) {
-    errEl.textContent = 'E-Mail nicht gefunden. Bitte zuerst registrieren.';
-    errEl.style.display = 'block';
-    return;
+  try {
+    const rows = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=*`);
+    if (!rows || rows.length === 0) {
+      errEl.textContent = 'E-Mail nicht gefunden. Bitte zuerst registrieren.';
+      errEl.style.display = 'block';
+      return;
+    }
+    const u = rows[0];
+    u.progress = {};
+    try {
+      const prog = await loadProgress(u.name);
+      u.progress = prog;
+    } catch(e) {}
+    activeUser = u;
+    saveSession(u);
+    allUsers = await loadAllUsers().catch(() => [u]);
+  } catch(e) {
+    // CORS fallback — login with email only, no server verification
+    const cached = getSession();
+    if (cached && cached.email === email) {
+      activeUser = cached;
+    } else {
+      errEl.textContent = 'Verbindung zu Supabase fehlgeschlagen. Bitte später nochmal versuchen.';
+      errEl.style.display = 'block';
+      return;
+    }
   }
-  const u = rows[0];
-  u.progress = await loadProgress(u.name);
-  activeUser = u;
-  saveSession(u);
-  allUsers = await loadAllUsers();
   closeModal();
   buildChapterNav();
   buildChapterScreens();
