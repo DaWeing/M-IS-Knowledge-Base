@@ -1490,8 +1490,9 @@ const CHAPTERS = [
 // SUPABASE CONFIG
 // ══════════════════════════════════════════════════
 const SUPABASE_URL = 'https://ezsiadgyhvybdjwefonm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6c2lhZGd5aHZ5YmRqd2Vmb25tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjIyNzksImV4cCI6MjA5MjkzODI3OX0.dNecTR8QN7yM-ZIDjthW31TwUu0Wu0XweBwAkIYGzjU';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6c2lhZGd5aHZ5YmRqd2Zmb25tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjIyNzksImV4cCI6MjA5MjkzODI3OX0.dNecTR8QN7yM-ZIDjthW31TwUu0Wu0XweBwAkIYGzjU';
 const MODULE = 'wb2';
+const SESSION_KEY = 'boev_session';
 
 async function sbFetch(path, options = {}) {
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
@@ -1507,66 +1508,48 @@ async function sbFetch(path, options = {}) {
   try { return await res.json(); } catch(e) { return null; }
 }
 
-const LOCAL_KEY = 'boev_wb2_local';
-function loadLocal() {
-  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || { users: [], activeUser: null }; }
-  catch(e) { return { users: [], activeUser: null }; }
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch(e) { return null; }
 }
-function saveLocal(data) {
-  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch(e) {}
+function saveSession(user) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
 }
 
-async function loadData() {
-  const local = loadLocal();
-  if (local.activeUser) {
-    const userName = local.users.find(u => u.id === local.activeUser)?.name;
-    if (userName) {
-      const rows = await sbFetch(`progress?select=*&user_name=eq.${encodeURIComponent(userName)}&chapter_id=like.${MODULE}_%`);
-      if (rows && rows.length > 0) {
-        const user = local.users.find(u => u.id === local.activeUser);
-        if (user) {
-          user.progress = user.progress || {};
-          rows.forEach(r => {
-            user.progress[r.chapter_id.replace(MODULE + '_', '')] = { done: true, score: r.score, total: r.total };
-          });
-          saveLocal(local);
-        }
-      }
-    }
-  }
-  return local;
-}
-
-function saveData(data) { saveLocal(data); }
-
-function getUserProgress(userData, userId) {
-  const user = userData.users.find(u => u.id === userId);
-  return user ? user.progress : {};
+async function loadProgress(userName) {
+  const rows = await sbFetch(`progress?select=*&user_name=eq.${encodeURIComponent(userName)}&chapter_id=like.${MODULE}_%`);
+  const progress = {};
+  if (rows) rows.forEach(r => {
+    progress[r.chapter_id.replace(MODULE + '_', '')] = { done: true, score: r.score, total: r.total };
+  });
+  return progress;
 }
 
 async function setChapterDone(userId, chapterId, score, total) {
-  const data = loadLocal();
-  const user = data.users.find(u => u.id === userId);
-  if (!user) return;
-  if (!user.progress) user.progress = {};
-  user.progress[chapterId] = { done: true, score, total };
-  saveLocal(data);
+  if (!activeUser) return;
+  activeUser.progress = activeUser.progress || {};
+  activeUser.progress[chapterId] = { done: true, score, total };
+  saveSession(activeUser);
   await sbFetch('progress', {
     method: 'POST',
     prefer: 'resolution=merge-duplicates',
     body: JSON.stringify({
-      user_name: user.name,
+      user_name: activeUser.name,
       chapter_id: MODULE + '_' + chapterId,
       score, total
     })
   });
 }
 
+async function loadAllUsers() {
+  const rows = await sbFetch('users?select=id,name,email&order=name');
+  return rows || [];
+}
+
 // ══════════════════════════════════════════════════
 // APP STATE
 // ══════════════════════════════════════════════════
-let appData = loadLocal();
-let activeUser = appData.activeUser;
+let activeUser = null;
+let allUsers = [];
 let currentChapter = null;
 let checkAnswers = {};
 
@@ -1574,8 +1557,13 @@ let checkAnswers = {};
 // INIT
 // ══════════════════════════════════════════════════
 async function init() {
-  appData = await loadData();
-  activeUser = appData.activeUser;
+  const session = getSession();
+  if (session) {
+    session.progress = await loadProgress(session.name);
+    saveSession(session);
+    activeUser = session;
+  }
+  allUsers = await loadAllUsers();
   buildChapterNav();
   buildChapterScreens();
   buildHomeOverview();
@@ -1600,53 +1588,49 @@ function getAvatarStyle(name) {
 function buildUserDropdown() {
   const list = document.getElementById('dropdownUserList');
   list.innerHTML = '';
-  appData.users.forEach(u => {
+  allUsers.forEach(u => {
     const [bg, color] = getAvatarStyle(u.name);
-    const done = Object.values(u.progress || {}).filter(p => p.done).length;
     const div = document.createElement('div');
-    div.className = 'dropdown-user-item' + (activeUser === u.id ? ' active' : '');
+    div.className = 'dropdown-user-item' + (activeUser?.id === u.id ? ' active' : '');
     div.innerHTML = `
       <div class="user-avatar" style="background:${bg};color:${color};font-size:13px;">${u.name.charAt(0).toUpperCase()}</div>
       <div><div style="font-weight:700;font-size:13px;">${u.name}</div>
-      <div style="font-size:11px;color:var(--text-muted)">${done} / ${CHAPTERS.length} Kapitel</div></div>`;
-    div.onclick = (e) => { e.stopPropagation(); selectUser(u.id); };
+      <div style="font-size:11px;color:var(--text-muted)">${u.email}</div></div>`;
+    div.onclick = (e) => { e.stopPropagation(); switchUser(u); };
     list.appendChild(div);
   });
 }
 
-function selectUser(id) {
-  appData = loadData();
-  appData.activeUser = id;
-  activeUser = id;
-  saveData(appData);
+async function switchUser(u) {
   document.getElementById('userDropdown').classList.remove('open');
+  u.progress = await loadProgress(u.name);
+  activeUser = u;
+  saveSession(u);
+  buildChapterNav();
+  buildChapterScreens();
+  buildHomeOverview();
   updateSidebarUser();
   buildUserDropdown();
-  buildChapterNav();
-  buildHomeOverview();
-  buildChapterScreens();
   showHome();
 }
 
 function updateSidebarUser() {
-  appData = loadData();
-  const user = appData.users.find(u => u.id === activeUser);
-  if (!user) {
+  if (!activeUser) {
     document.getElementById('sidebarAvatar').textContent = '?';
     document.getElementById('sidebarAvatar').style.background = '#1a1828';
     document.getElementById('sidebarAvatar').style.color = '#58a6ff';
-    document.getElementById('sidebarUserName').textContent = 'Benutzer wählen';
+    document.getElementById('sidebarUserName').textContent = 'Bitte in index.html anmelden';
     document.getElementById('sidebarUserProgress').textContent = '0 von ' + CHAPTERS.length + ' abgeschlossen';
     document.getElementById('overallFill').style.width = '0%';
     document.getElementById('overallLabel').textContent = '0%';
     return;
   }
-  const [bg, color] = getAvatarStyle(user.name);
+  const [bg, color] = getAvatarStyle(activeUser.name);
   document.getElementById('sidebarAvatar').style.background = bg;
   document.getElementById('sidebarAvatar').style.color = color;
-  document.getElementById('sidebarAvatar').textContent = user.name.charAt(0).toUpperCase();
-  document.getElementById('sidebarUserName').textContent = user.name;
-  const done = Object.values(user.progress || {}).filter(p => p.done).length;
+  document.getElementById('sidebarAvatar').textContent = activeUser.name.charAt(0).toUpperCase();
+  document.getElementById('sidebarUserName').textContent = activeUser.name;
+  const done = Object.values(activeUser.progress || {}).filter(p => p.done).length;
   document.getElementById('sidebarUserProgress').textContent = done + ' von ' + CHAPTERS.length + ' abgeschlossen';
   const pct = Math.round((done / CHAPTERS.length) * 100);
   document.getElementById('overallFill').style.width = pct + '%';
@@ -1663,40 +1647,18 @@ document.addEventListener('click', () => {
 });
 
 function openModal() {
-  document.getElementById('userDropdown').classList.remove('open');
-  document.getElementById('modalOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('newUserInput').focus(), 100);
+  window.location.href = 'index.html';
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
-  document.getElementById('newUserInput').value = '';
-}
-
-function addUser() {
-  const name = document.getElementById('newUserInput').value.trim();
-  if (!name) return;
-  appData = loadData();
-  const id = 'u_' + Date.now();
-  appData.users.push({ id, name, progress: {} });
-  appData.activeUser = id;
-  activeUser = id;
-  saveData(appData);
-  closeModal();
-  updateSidebarUser();
-  buildUserDropdown();
-  buildChapterNav();
-  buildHomeOverview();
-  buildChapterScreens();
-  showHome();
 }
 
 // ══════════════════════════════════════════════════
 // CHAPTER NAV
 // ══════════════════════════════════════════════════
 function buildChapterNav() {
-  appData = loadData();
-  const progress = activeUser ? getUserProgress(appData, activeUser) : {};
+  const progress = activeUser?.progress || {};
   const nav = document.getElementById('chapterNavItems');
   nav.innerHTML = '';
   CHAPTERS.forEach((ch, i) => {
@@ -1718,8 +1680,7 @@ function buildChapterNav() {
 // HOME OVERVIEW
 // ══════════════════════════════════════════════════
 function buildHomeOverview() {
-  appData = loadData();
-  const progress = activeUser ? getUserProgress(appData, activeUser) : {};
+  const progress = activeUser?.progress || {};
   const cont = document.getElementById('moduleOverview');
   cont.innerHTML = '';
   CHAPTERS.forEach(ch => {
@@ -1744,8 +1705,7 @@ function buildHomeOverview() {
 // CHAPTER SCREENS
 // ══════════════════════════════════════════════════
 function buildChapterScreens() {
-  appData = loadData();
-  const progress = activeUser ? getUserProgress(appData, activeUser) : {};
+  const progress = activeUser?.progress || {};
   const cont = document.getElementById('chapterScreens');
   cont.innerHTML = '';
   CHAPTERS.forEach((ch, chIdx) => {
@@ -1934,8 +1894,7 @@ function submitCheck(chapterId) {
 
   // Save progress
   if (activeUser) {
-    setChapterDone(activeUser, chapterId, score, total);
-    appData = loadData();
+    setChapterDone(activeUser.id, chapterId, score, total);
     updateSidebarUser();
     buildChapterNav();
     buildHomeOverview();

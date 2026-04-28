@@ -631,7 +631,7 @@
   <div class="header">
     <div class="logo">
       <div class="logo-badge">BÖV</div>
-      <div class="logo-title">Lernprogramm</div>
+      <div class="logo-title">Quiz · <span id="quizUserName" style="color:var(--accent)">...</span></div>
     </div>
     <div class="score-display">
       <div class="score-item">
@@ -1222,6 +1222,22 @@ function goToStart() {
   document.getElementById('progressWrap').style.display = 'none';
   showScreen('screenStart');
 }
+
+// ============================================================
+// SESSION — Benutzer aus index.html übernehmen
+// ============================================================
+(function() {
+  try {
+    const session = JSON.parse(localStorage.getItem('boev_session'));
+    if (session && session.name) {
+      document.getElementById('quizUserName').textContent = session.name;
+    } else {
+      document.getElementById('quizUserName').textContent = 'Bitte anmelden';
+    }
+  } catch(e) {
+    document.getElementById('quizUserName').textContent = 'Quiz';
+  }
+})();
 </script>
 </body>
 </html>

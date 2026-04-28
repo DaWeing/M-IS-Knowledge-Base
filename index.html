@@ -257,17 +257,40 @@ body {
 </head>
 <body>
 
+<!-- LOGIN / REGISTER MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-title">Neuen Benutzer anlegen</div>
-    <div class="modal-input-wrap">
-      <label class="modal-label">Vorname</label>
-      <input class="modal-input" id="newUserInput" type="text" placeholder="z.B. Anna" maxlength="30"
-        onkeydown="if(event.key==='Enter') addUser()">
+    <div id="modalLogin">
+      <div class="modal-title">👋 Anmelden</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Gib deine E-Mail-Adresse ein um fortzufahren. Bist du neu? Klicke auf "Registrieren".</p>
+      <div class="modal-input-wrap">
+        <label class="modal-label">E-Mail</label>
+        <input class="modal-input" id="loginEmail" type="email" placeholder="name@beispiel.at"
+          onkeydown="if(event.key==='Enter') loginUser()">
+      </div>
+      <div id="loginError" style="font-size:12px;color:var(--accent-red);margin-bottom:12px;display:none;"></div>
+      <div class="modal-actions">
+        <button class="btn-sm ghost" onclick="showRegister()">Neu registrieren</button>
+        <button class="btn-sm primary" onclick="loginUser()">Anmelden</button>
+      </div>
     </div>
-    <div class="modal-actions">
-      <button class="btn-sm ghost" onclick="closeModal()">Abbrechen</button>
-      <button class="btn-sm primary" onclick="addUser()">Anlegen</button>
+    <div id="modalRegister" style="display:none;">
+      <div class="modal-title">✨ Registrieren</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Einmalige Registrierung — danach auf jedem Gerät mit E-Mail anmelden.</p>
+      <div class="modal-input-wrap">
+        <label class="modal-label">Vorname</label>
+        <input class="modal-input" id="regName" type="text" placeholder="z.B. Anna" maxlength="30">
+      </div>
+      <div class="modal-input-wrap">
+        <label class="modal-label">E-Mail</label>
+        <input class="modal-input" id="regEmail" type="email" placeholder="name@beispiel.at"
+          onkeydown="if(event.key==='Enter') registerUser()">
+      </div>
+      <div id="regError" style="font-size:12px;color:var(--accent-red);margin-bottom:12px;display:none;"></div>
+      <div class="modal-actions">
+        <button class="btn-sm ghost" onclick="showLogin()">Bereits registriert</button>
+        <button class="btn-sm primary" onclick="registerUser()">Registrieren</button>
+      </div>
     </div>
   </div>
 </div>
@@ -289,7 +312,7 @@ body {
         <div class="user-dropdown" id="userDropdown">
           <div id="dropdownUserList"></div>
           <div class="dropdown-divider"></div>
-          <div class="dropdown-action" onclick="openModal()">＋ Neuen Benutzer anlegen</div>
+          <div class="dropdown-action" onclick="openModal()">＋ Anmelden / Registrieren</div>
         </div>
       </div>
     </div>
@@ -904,6 +927,7 @@ const CHAPTERS = [
 const SUPABASE_URL = 'https://ezsiadgyhvybdjwefonm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6c2lhZGd5aHZ5YmRqd2Vmb25tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjIyNzksImV4cCI6MjA5MjkzODI3OX0.dNecTR8QN7yM-ZIDjthW31TwUu0Wu0XweBwAkIYGzjU';
 const MODULE = 'wb1';
+const SESSION_KEY = 'boev_session';
 
 async function sbFetch(path, options = {}) {
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
@@ -919,65 +943,54 @@ async function sbFetch(path, options = {}) {
   try { return await res.json(); } catch(e) { return null; }
 }
 
-// LOCAL CACHE (für schnelle UI-Updates)
-const LOCAL_KEY = 'boev_wb1_local';
-function loadLocal() {
-  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || { users: [], activeUser: null }; }
-  catch(e) { return { users: [], activeUser: null }; }
+// SESSION — aktiver Benutzer lokal gemerkt
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch(e) { return null; }
 }
-function saveLocal(data) {
-  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch(e) {}
+function saveSession(user) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
 }
-
-// LOAD: Benutzer + Fortschritt aus Supabase
-async function loadData() {
-  const local = loadLocal();
-  // Fortschritt aus Supabase nachladen wenn Benutzer aktiv
-  if (local.activeUser) {
-    const userName = local.users.find(u => u.id === local.activeUser)?.name;
-    if (userName) {
-      const rows = await sbFetch(`progress?select=*&user_name=eq.${encodeURIComponent(userName)}&chapter_id=like.${MODULE}_%`);
-      if (rows && rows.length > 0) {
-        const user = local.users.find(u => u.id === local.activeUser);
-        if (user) {
-          user.progress = user.progress || {};
-          rows.forEach(r => {
-            user.progress[r.chapter_id.replace(MODULE + '_', '')] = { done: true, score: r.score, total: r.total };
-          });
-          saveLocal(local);
-        }
-      }
-    }
-  }
-  return local;
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
 }
 
-function saveData(data) { saveLocal(data); }
+// Fortschritt für aktiven Benutzer laden
+async function loadProgress(userName) {
+  const rows = await sbFetch(`progress?select=*&user_name=eq.${encodeURIComponent(userName)}&chapter_id=like.${MODULE}_%`);
+  const progress = {};
+  if (rows) rows.forEach(r => {
+    progress[r.chapter_id.replace(MODULE + '_', '')] = { done: true, score: r.score, total: r.total };
+  });
+  return progress;
+}
 
 async function setChapterDone(userId, chapterId, score, total) {
-  const data = loadLocal();
-  const user = data.users.find(u => u.id === userId);
-  if (!user) return;
-  if (!user.progress) user.progress = {};
-  user.progress[chapterId] = { done: true, score, total };
-  saveLocal(data);
-  // Supabase upsert
+  if (!activeUser) return;
+  activeUser.progress = activeUser.progress || {};
+  activeUser.progress[chapterId] = { done: true, score, total };
+  saveSession(activeUser);
   await sbFetch('progress', {
     method: 'POST',
     prefer: 'resolution=merge-duplicates',
     body: JSON.stringify({
-      user_name: user.name,
+      user_name: activeUser.name,
       chapter_id: MODULE + '_' + chapterId,
       score, total
     })
   });
 }
 
+// Alle Benutzer aus Supabase laden
+async function loadAllUsers() {
+  const rows = await sbFetch('users?select=id,name,email&order=name');
+  return rows || [];
+}
+
 // ═══════════════════════════════════════════════════════
 // APP STATE
 // ═══════════════════════════════════════════════════════
-let appData = loadLocal();
-let activeUser = appData.activeUser;
+let activeUser = null; // { id, name, email, progress }
+let allUsers = [];
 let currentChapter = null;
 let checkAnswers = {};
 
@@ -995,13 +1008,19 @@ function getAvatarStyle(name) {
 // INIT
 // ═══════════════════════════════════════════════════════
 async function init() {
-  appData = await loadData();
-  activeUser = appData.activeUser;
+  const session = getSession();
+  if (session) {
+    session.progress = await loadProgress(session.name);
+    saveSession(session);
+    activeUser = session;
+  }
+  allUsers = await loadAllUsers();
   buildChapterNav();
   buildChapterScreens();
   buildHomeOverview();
   updateSidebarUser();
   buildUserDropdown();
+  if (!activeUser) openModal();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1010,50 +1029,48 @@ async function init() {
 function buildUserDropdown() {
   const list = document.getElementById('dropdownUserList');
   list.innerHTML = '';
-  appData.users.forEach(u => {
+  allUsers.forEach(u => {
     const [bg, color] = getAvatarStyle(u.name);
-    const done = Object.values(u.progress || {}).filter(p => p.done).length;
     const div = document.createElement('div');
-    div.className = 'dropdown-user-item' + (activeUser === u.id ? ' active' : '');
+    div.className = 'dropdown-user-item' + (activeUser?.id === u.id ? ' active' : '');
     div.innerHTML = `<div class="user-avatar" style="background:${bg};color:${color};font-size:13px;">${u.name.charAt(0).toUpperCase()}</div>
       <div><div style="font-weight:700;font-size:13px;">${u.name}</div>
-      <div style="font-size:11px;color:var(--text-muted)">${done} / ${CHAPTERS.length} Kapitel</div></div>`;
-    div.onclick = (e) => { e.stopPropagation(); selectUser(u.id); };
+      <div style="font-size:11px;color:var(--text-muted)">${u.email}</div></div>`;
+    div.onclick = (e) => { e.stopPropagation(); switchUser(u); };
     list.appendChild(div);
   });
 }
 
-function selectUser(id) {
-  appData = loadData();
-  appData.activeUser = id;
-  activeUser = id;
-  saveData(appData);
+async function switchUser(u) {
   document.getElementById('userDropdown').classList.remove('open');
+  u.progress = await loadProgress(u.name);
+  activeUser = u;
+  saveSession(u);
+  buildChapterNav();
+  buildChapterScreens();
+  buildHomeOverview();
   updateSidebarUser();
   buildUserDropdown();
-  buildChapterNav();
-  buildHomeOverview();
-  buildChapterScreens();
   showHome();
 }
 
 function updateSidebarUser() {
-  appData = loadData();
-  const user = appData.users.find(u => u.id === activeUser);
-  if (!user) {
+  if (!activeUser) {
     document.getElementById('sidebarAvatar').textContent = '?';
-    document.getElementById('sidebarUserName').textContent = 'Benutzer wählen';
+    document.getElementById('sidebarAvatar').style.background = '#dbeafe';
+    document.getElementById('sidebarAvatar').style.color = '#1a6bcc';
+    document.getElementById('sidebarUserName').textContent = 'Anmelden';
     document.getElementById('sidebarUserProgress').textContent = '0 von ' + CHAPTERS.length + ' abgeschlossen';
     document.getElementById('overallFill').style.width = '0%';
     document.getElementById('overallLabel').textContent = '0%';
     return;
   }
-  const [bg, color] = getAvatarStyle(user.name);
+  const [bg, color] = getAvatarStyle(activeUser.name);
   const av = document.getElementById('sidebarAvatar');
   av.style.background = bg; av.style.color = color;
-  av.textContent = user.name.charAt(0).toUpperCase();
-  document.getElementById('sidebarUserName').textContent = user.name;
-  const done = Object.values(user.progress || {}).filter(p => p.done).length;
+  av.textContent = activeUser.name.charAt(0).toUpperCase();
+  document.getElementById('sidebarUserName').textContent = activeUser.name;
+  const done = Object.values(activeUser.progress || {}).filter(p => p.done).length;
   document.getElementById('sidebarUserProgress').textContent = done + ' von ' + CHAPTERS.length + ' abgeschlossen';
   const pct = Math.round((done / CHAPTERS.length) * 100);
   document.getElementById('overallFill').style.width = pct + '%';
@@ -1068,28 +1085,88 @@ document.addEventListener('click', () => { document.getElementById('userDropdown
 
 function openModal() {
   document.getElementById('userDropdown').classList.remove('open');
+  showLogin();
   document.getElementById('modalOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('newUserInput').focus(), 100);
 }
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
-  document.getElementById('newUserInput').value = '';
 }
-function addUser() {
-  const name = document.getElementById('newUserInput').value.trim();
-  if (!name) return;
-  appData = loadData();
-  const id = 'u_' + Date.now();
-  appData.users.push({ id, name, progress: {} });
-  appData.activeUser = id;
-  activeUser = id;
-  saveData(appData);
+function showLogin() {
+  document.getElementById('modalLogin').style.display = 'block';
+  document.getElementById('modalRegister').style.display = 'none';
+  document.getElementById('loginError').style.display = 'none';
+  setTimeout(() => document.getElementById('loginEmail')?.focus(), 100);
+}
+function showRegister() {
+  document.getElementById('modalLogin').style.display = 'none';
+  document.getElementById('modalRegister').style.display = 'block';
+  document.getElementById('regError').style.display = 'none';
+  setTimeout(() => document.getElementById('regName')?.focus(), 100);
+}
+
+async function loginUser() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  if (!email) return;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  const rows = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=*`);
+  if (!rows || rows.length === 0) {
+    errEl.textContent = 'E-Mail nicht gefunden. Bitte zuerst registrieren.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const u = rows[0];
+  u.progress = await loadProgress(u.name);
+  activeUser = u;
+  saveSession(u);
+  allUsers = await loadAllUsers();
   closeModal();
+  buildChapterNav();
+  buildChapterScreens();
+  buildHomeOverview();
   updateSidebarUser();
   buildUserDropdown();
+  showHome();
+}
+
+async function registerUser() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const errEl = document.getElementById('regError');
+  errEl.style.display = 'none';
+  if (!name || !email) {
+    errEl.textContent = 'Bitte Name und E-Mail eingeben.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const existing = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`);
+  if (existing && existing.length > 0) {
+    errEl.textContent = 'Diese E-Mail ist bereits registriert. Bitte anmelden.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const id = 'u_' + Date.now();
+  const result = await sbFetch('users', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates,return=representation',
+    body: JSON.stringify({ id, name, email })
+  });
+  if (!result) {
+    errEl.textContent = 'Fehler beim Registrieren. Bitte nochmal versuchen.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const u = Array.isArray(result) ? result[0] : { id, name, email };
+  u.progress = {};
+  activeUser = u;
+  saveSession(u);
+  allUsers = await loadAllUsers();
+  closeModal();
   buildChapterNav();
-  buildHomeOverview();
   buildChapterScreens();
+  buildHomeOverview();
+  updateSidebarUser();
+  buildUserDropdown();
   showHome();
 }
 
@@ -1097,8 +1174,7 @@ function addUser() {
 // CHAPTER NAV
 // ═══════════════════════════════════════════════════════
 function buildChapterNav() {
-  appData = loadData();
-  const progress = activeUser ? (appData.users.find(u=>u.id===activeUser)?.progress || {}) : {};
+  const progress = activeUser?.progress || {};
   const nav = document.getElementById('chapterNavItems');
   nav.innerHTML = '';
   CHAPTERS.forEach((ch, i) => {
@@ -1119,8 +1195,7 @@ function buildChapterNav() {
 // HOME OVERVIEW
 // ═══════════════════════════════════════════════════════
 function buildHomeOverview() {
-  appData = loadData();
-  const progress = activeUser ? (appData.users.find(u=>u.id===activeUser)?.progress || {}) : {};
+  const progress = activeUser?.progress || {};
   const cont = document.getElementById('moduleOverview');
   cont.innerHTML = '';
   CHAPTERS.forEach(ch => {
@@ -1145,8 +1220,7 @@ function buildHomeOverview() {
 // CHAPTER SCREENS
 // ═══════════════════════════════════════════════════════
 function buildChapterScreens() {
-  appData = loadData();
-  const progress = activeUser ? (appData.users.find(u=>u.id===activeUser)?.progress || {}) : {};
+  const progress = activeUser?.progress || {};
   const cont = document.getElementById('chapterScreens');
   cont.innerHTML = '';
   checkAnswers = {};
@@ -1299,8 +1373,7 @@ function submitCheck(chapterId) {
     banner.classList.add('show');
   }
   if (activeUser) {
-    setChapterDone(activeUser, chapterId, score, total);
-    appData = loadData();
+    setChapterDone(activeUser.id, chapterId, score, total);
     updateSidebarUser();
     buildChapterNav();
     buildHomeOverview();
